@@ -1,20 +1,18 @@
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type ScrollViewInstance,
+} from 'react-native';
 import { router } from 'expo-router';
-import { searchSongs, songs, spotifySearchUrl, youtubeSearchUrl } from '../data/songs';
-import { categories, techniqueById, techniques } from '../data/techniques';
+import { searchSongs, spotifySearchUrl, youtubeSearchUrl } from '../data/songs';
+import { techniqueById } from '../data/techniques';
+import { TechniqueExplorer } from '../components/TechniqueExplorer';
 
-// Recursos que se muestran sin desplegar la lista completa.
-const FEATURED = [
-  'vibrato',
-  'falsete',
-  'belting',
-  'melisma',
-  'voz-mixta',
-  'portamento',
-  'sollozo',
-  'twang',
-];
 import type { Song } from '../data/types';
 import { Card, LinkButton, Page, Pill, SectionTitle } from '../components/ui';
 import { colors, radius, sectionColors } from '../theme';
@@ -22,13 +20,16 @@ import { colors, radius, sectionColors } from '../theme';
 export default function Home() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<string | undefined>();
-  const [showAll, setShowAll] = useState(false);
   const results = useMemo(() => searchSongs(query, filter), [query, filter]);
-  const countFor = (id: string) =>
-    songs.filter((s) => s.occurrences.some((o) => o.techniqueId === id)).length;
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  const [libraryY, setLibraryY] = useState(0);
+  const showSongsWith = (id: string) => {
+    setFilter(id);
+    scrollRef.current?.scrollTo({ y: libraryY, animated: true });
+  };
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: 64 }}>
+    <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: 64 }}>
       <Page>
         <View style={styles.header}>
           <Text style={styles.logo}>
@@ -41,8 +42,8 @@ export default function Home() {
 
         <Text style={styles.hero}>¿Qué quieres cantar hoy?</Text>
         <Text style={styles.heroSub}>
-          Busca una canción y descubre su estructura, sus tonos y los recursos vocales que usa, con
-          ejercicios para practicar cada uno.
+          Busca una canción y descubre su estructura, sus tonos y los recursos vocales que usa. O
+          explora los recursos y aprende a entrenarlos.
         </Text>
 
         <View style={styles.searchBox}>
@@ -58,44 +59,7 @@ export default function Home() {
           />
         </View>
 
-        <View style={styles.filterHead}>
-          <Text style={styles.filterLabel}>
-            {filter
-              ? `Canciones con ${techniqueById(filter)?.name.toLowerCase()}`
-              : `Filtra por recurso vocal (${techniques.length})`}
-          </Text>
-          <Pressable onPress={() => setShowAll(!showAll)} accessibilityRole="button">
-            <Text style={styles.toggle}>{showAll ? 'Ver menos' : 'Ver todos'}</Text>
-          </Pressable>
-        </View>
-        {(showAll ? categories : [undefined]).map((cat) => {
-          const list = cat
-            ? techniques.filter((t) => t.category === cat)
-            : techniques.filter((t) => FEATURED.includes(t.id) || t.id === filter);
-          return (
-            <View key={cat ?? 'featured'} style={{ marginBottom: 10 }}>
-              {cat && <Text style={styles.catLabel}>{cat}</Text>}
-              <View style={styles.pills}>
-                {list.map((t) => (
-                  <Pill
-                    key={t.id}
-                    label={`${t.name} · ${countFor(t.id)}`}
-                    color={t.color}
-                    dot
-                    active={filter === t.id}
-                    onPress={() => setFilter(filter === t.id ? undefined : t.id)}
-                  />
-                ))}
-              </View>
-            </View>
-          );
-        })}
-        {filter && (
-          <Pressable onPress={() => setFilter(undefined)} accessibilityRole="button">
-            <Text style={styles.toggle}>✕ Quitar filtro</Text>
-          </Pressable>
-        )}
-
+        <View onLayout={(e) => setLibraryY(e.nativeEvent.layout.y)} />
         <SectionTitle
           hint={
             query || filter
@@ -105,6 +69,18 @@ export default function Home() {
         >
           Biblioteca
         </SectionTitle>
+
+        {filter && (
+          <View style={styles.activeFilter}>
+            <View style={[styles.techDot, { backgroundColor: techniqueById(filter)?.color }]} />
+            <Text style={styles.activeFilterText}>
+              Canciones con {techniqueById(filter)?.name.toLowerCase()}
+            </Text>
+            <Pressable onPress={() => setFilter(undefined)} accessibilityRole="button">
+              <Text style={styles.toggle}>✕ Quitar</Text>
+            </Pressable>
+          </View>
+        )}
 
         <View style={styles.grid}>
           {results.map((s) => (
@@ -146,6 +122,11 @@ export default function Home() {
             </View>
           </Card>
         )}
+
+        <SectionTitle hint="Elige un recurso para saber qué es, probar un ejercicio y entrenarlo con vídeos">
+          Explora los recursos vocales
+        </SectionTitle>
+        <TechniqueExplorer onShowSongs={showSongsWith} />
       </Page>
     </ScrollView>
   );
@@ -228,25 +209,21 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     outlineStyle: 'none',
   } as never,
-  filterHead: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  filterLabel: { color: colors.muted, fontSize: 14, fontWeight: '700' },
   toggle: { color: colors.accent, fontSize: 14, fontWeight: '700' },
-  catLabel: {
-    color: colors.faint,
-    fontSize: 12,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 8,
-    marginTop: 6,
+  activeFilter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginBottom: 14,
   },
-  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  activeFilterText: { color: colors.text, fontSize: 14, fontWeight: '700' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
   card: {
     flexGrow: 1,
