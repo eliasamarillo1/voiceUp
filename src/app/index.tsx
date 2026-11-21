@@ -10,14 +10,14 @@ import {
   type ScrollViewInstance,
 } from 'react-native';
 import { router } from 'expo-router';
-import { searchSongs, spotifySearchUrl, youtubeSearchUrl } from '../data/songs';
+import { searchSongs } from '../data/songs';
 import { techniqueById } from '../data/techniques';
 import { TechniqueExplorer } from '../components/TechniqueExplorer';
-import { PixelBee } from '../components/PixelBee';
+import { CatalogResults } from '../components/CatalogResults';
 import { CornerOrnament, Fleuron, Frame, IrisClump, SOFT_SHADOW } from '../components/Nouveau';
 
 import type { Song } from '../data/types';
-import { Card, LinkButton, Page, Pill, SectionTitle } from '../components/ui';
+import { Card, Page, Pill, SectionTitle } from '../components/ui';
 import { fonts, colors, radius, sectionColors } from '../theme';
 
 export default function Home() {
@@ -132,7 +132,9 @@ export default function Home() {
         <View onLayout={(e) => setLibraryY(e.nativeEvent.layout.y)} />
         <SectionTitle
           hint={
-            query || filter
+            query && results.length === 0 && !filter
+              ? 'Ninguna canción de ejemplo coincide. Mira debajo en todo el catálogo'
+              : query || filter
               ? `${results.length} resultado${results.length === 1 ? '' : 's'}`
               : 'Toca una canción para abrir su carpeta'
           }
@@ -178,23 +180,7 @@ export default function Home() {
           </Card>
         )}
 
-        {results.length === 0 && !!query && (
-          <Card style={{ gap: 12 }}>
-            <View style={styles.beeNote}>
-              <PixelBee size={2} />
-              <Text style={styles.emptyTitle}>Esta canción todavía no está analizada</Text>
-            </View>
-            <Text style={styles.emptyText}>
-              En la versión final, VoiceUp analizará automáticamente cualquier canción que busques:
-              estructura, tonalidad, letra sincronizada y recursos vocales. De momento puedes
-              escucharla aquí:
-            </Text>
-            <View style={styles.row}>
-              <LinkButton label="Buscar en Spotify" url={spotifySearchUrl(query)} tone="spotify" />
-              <LinkButton label="Buscar en YouTube" url={youtubeSearchUrl(query)} tone="youtube" />
-            </View>
-          </Card>
-        )}
+        {!!query && <CatalogResults query={query} />}
 
         <SectionTitle hint="Elige un recurso para saber qué es, probar un ejercicio y entrenarlo con vídeos">
           Explora los recursos vocales
