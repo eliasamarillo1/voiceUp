@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { songById, songs } from '../../data/songs';
 import { techniqueById } from '../../data/techniques';
 import type { Technique } from '../../data/types';
-import { YouTubeEmbed } from '../../components/YouTubeEmbed';
+import { VideoCarousel } from '../../components/VideoCarousel';
 import { Body, Card, LinkButton, Page, SectionTitle } from '../../components/ui';
 import { fonts, colors, formatTime, radius } from '../../theme';
 
@@ -120,20 +120,14 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
           })}
         </View>
 
-        <SectionTitle hint="Se reproducen aquí mismo, sin salir de la app">
+        <SectionTitle hint="Toca uno para verlo aquí mismo, sin salir de la app">
           Vídeos tutoriales
         </SectionTitle>
-        <View style={styles.videos}>
-          {t.tutorials.map((v) => (
-            <View key={v.videoId} style={styles.video}>
-              <YouTubeEmbed videoId={v.videoId} title={v.title} />
-              <Text style={styles.videoTitle}>{v.title}</Text>
-              <Text style={styles.videoMeta}>
-                {v.language === 'es' ? 'En español' : 'En inglés'}
-              </Text>
-            </View>
-          ))}
-        </View>
+        <VideoCarousel
+          videos={t.tutorials}
+          searchQuery={`${t.name} canto tutorial`}
+          accent={t.color}
+        />
 
         <SectionTitle>Errores típicos</SectionTitle>
         <View style={{ gap: 8 }}>
@@ -172,19 +166,16 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
           </>
         )}
 
-        <SectionTitle>Fuentes</SectionTitle>
-        <View style={styles.row}>
-          {t.sources.map((s) => (
-            <LinkButton key={s.url} label={s.label} url={s.url} />
-          ))}
-          {t.tutorials.map((v) => (
-            <LinkButton
-              key={v.videoId}
-              label={`YouTube: ${v.title}`}
-              url={`https://www.youtube.com/watch?v=${v.videoId}`}
-            />
-          ))}
-        </View>
+        {t.sources.length > 0 && (
+          <>
+            <SectionTitle>Fuentes</SectionTitle>
+            <View style={styles.row}>
+              {t.sources.map((s) => (
+                <LinkButton key={s.url} label={s.label} url={s.url} />
+              ))}
+            </View>
+          </>
+        )}
       </Page>
     </ScrollView>
   );
@@ -242,10 +233,6 @@ const styles = StyleSheet.create({
   exTitle: { color: colors.text, fontSize: 16, fontFamily: fonts.heavy, flex: 1 },
   exToggle: { fontSize: 24, fontFamily: fonts.display },
   exStep: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, lineHeight: 22 },
-  videos: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
-  video: { flexGrow: 1, flexBasis: 280, maxWidth: '100%' },
-  videoTitle: { color: colors.text, fontSize: 14, fontFamily: fonts.bold, marginTop: 8 },
-  videoMeta: { color: colors.faint, fontSize: 13, fontFamily: fonts.regular, marginTop: 2 },
   mistake: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, lineHeight: 22 },
   songRow: { backgroundColor: colors.surface, borderRadius: radius.md, padding: 14 },
   songTitle: { color: colors.text, fontSize: 16, fontFamily: fonts.heavy },
