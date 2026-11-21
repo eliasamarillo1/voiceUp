@@ -51,6 +51,9 @@ export default function Home() {
             <Pressable onPress={() => router.push('/recursos')} accessibilityRole="link">
               <Text style={styles.headerLink}>Recursos</Text>
             </Pressable>
+            <Pressable onPress={() => router.push('/piano')} accessibilityRole="link">
+              <Text style={styles.headerLink}>Piano</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -306,7 +309,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: fonts.bold,
   },
-  nav: { flexDirection: 'row', gap: 20 },
+  nav: { flexDirection: 'row', gap: 14 },
   panel: {
     marginTop: 16,
     borderWidth: 1.5,

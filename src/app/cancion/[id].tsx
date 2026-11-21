@@ -11,6 +11,7 @@ import { Frame } from '../../components/Nouveau';
 import { SheetMusic } from '../../components/SheetMusic';
 import { Instrumental } from '../../components/Instrumental';
 import { chordsBySong } from '../../data/chords';
+import { PianoKeyLink } from '../../components/PianoKeyLink';
 import { YouTubeEmbed } from '../../components/YouTubeEmbed';
 import { Body, Card, LinkButton, Page, Pill } from '../../components/ui';
 import { fonts, colors, formatTime, radius, sectionColors, sectionInk } from '../../theme';
@@ -395,6 +396,9 @@ function KeysTab({ song }: { song: Song }) {
             {formatTime(k.start)} – {formatTime(k.end)}
           </Text>
           {k.note && <Text style={[styles.techSummary, { marginTop: 6 }]}>{k.note}</Text>}
+          <View style={{ marginTop: 10 }}>
+            <PianoKeyLink keyName={transposeKey(k.key, shift)} />
+          </View>
         </Card>
       ))}
       <Card>
