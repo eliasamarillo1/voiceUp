@@ -1,7 +1,13 @@
 // Utilidades musicales sencillas: transponer tonalidades y notas en notación española.
 
 const NOTES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
-const FLATS: Record<string, string> = { Reb: 'Do#', Mib: 'Re#', Solb: 'Fa#', Lab: 'Sol#', Sib: 'La#' };
+const FLATS: Record<string, string> = {
+  Reb: 'Do#',
+  Mib: 'Re#',
+  Solb: 'Fa#',
+  Lab: 'Sol#',
+  Sib: 'La#',
+};
 
 function indexOf(name: string) {
   const n = FLATS[name] ?? name;

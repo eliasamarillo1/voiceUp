@@ -1,13 +1,15 @@
-import type { Technique } from './types';
+import type { Technique, TechniqueCategory } from './types';
+import { extraTechniques } from './techniquesExtra';
 
 // Catálogo global de recursos vocales. Se escribe una vez y sirve para todas las canciones.
 // Los vídeos son tutoriales públicos de YouTube; se reproducen con el reproductor oficial.
 
-export const techniques: Technique[] = [
+const baseTechniques: Technique[] = [
   {
     id: 'vibrato',
     name: 'Vibrato',
-    color: '#7C9CFF',
+    category: 'Adornos y afinación',
+    color: '#3D63DD',
     level: 'Intermedio',
     summary: 'Una oscilación regular y suave de la afinación sobre una nota sostenida.',
     whatIs:
@@ -51,8 +53,16 @@ export const techniques: Technique[] = [
       },
     ],
     tutorials: [
-      { videoId: '_LWlrBlrh3M', title: 'Cómo cantar con vibrato: ejercicios (1/3)', language: 'es' },
-      { videoId: 'w_HpI-bhrYI', title: '¿Cómo hacer vibrato con la voz? ¿Qué es el vibrato?', language: 'es' },
+      {
+        videoId: '_LWlrBlrh3M',
+        title: 'Cómo cantar con vibrato: ejercicios (1/3)',
+        language: 'es',
+      },
+      {
+        videoId: 'w_HpI-bhrYI',
+        title: '¿Cómo hacer vibrato con la voz? ¿Qué es el vibrato?',
+        language: 'es',
+      },
       { videoId: 'R79AVrbOvAE', title: 'How To Sing With Vibrato', language: 'en' },
     ],
     sources: [{ label: 'Vibrato (Wikipedia)', url: 'https://es.wikipedia.org/wiki/Vibrato' }],
@@ -60,7 +70,8 @@ export const techniques: Technique[] = [
   {
     id: 'glissando',
     name: 'Glissando',
-    color: '#2ED3B7',
+    category: 'Adornos y afinación',
+    color: '#0E8F80',
     level: 'Básico',
     summary: 'Un deslizamiento continuo de la voz que recorre todas las alturas entre dos notas.',
     whatIs:
@@ -104,14 +115,19 @@ export const techniques: Technique[] = [
     tutorials: [
       { videoId: 'FbafpUT66-w', title: 'Canto: glissando y portamento', language: 'es' },
       { videoId: 'hFkZCweeU9g', title: 'Glissando vocal exercise', language: 'en' },
-      { videoId: 'uMpSZB4T6bs', title: 'Glissando 1a: transición suave entre registros', language: 'en' },
+      {
+        videoId: 'uMpSZB4T6bs',
+        title: 'Glissando 1a: transición suave entre registros',
+        language: 'en',
+      },
     ],
     sources: [{ label: 'Glissando (Wikipedia)', url: 'https://es.wikipedia.org/wiki/Glissando' }],
   },
   {
     id: 'portamento',
     name: 'Portamento',
-    color: '#FFB547',
+    category: 'Adornos y afinación',
+    color: '#C25E00',
     level: 'Intermedio',
     summary: 'Un enlace breve y expresivo entre dos notas, "llevando" la voz de una a otra.',
     whatIs:
@@ -153,7 +169,8 @@ export const techniques: Technique[] = [
   {
     id: 'melisma',
     name: 'Melisma',
-    color: '#FF6FB1',
+    category: 'Adornos y afinación',
+    color: '#D12F7A',
     level: 'Avanzado',
     summary: 'Varias notas cantadas sobre una misma sílaba.',
     whatIs:
@@ -196,14 +213,19 @@ export const techniques: Technique[] = [
     tutorials: [
       { videoId: '4-mbqr7m3q0', title: '¿Cómo cantar melismas? 5 pasos', language: 'es' },
       { videoId: 'tX5g1s_b9HQ', title: 'Técnica para runs, riffs y melismas', language: 'es' },
-      { videoId: 'ZqfO6j5gNoE', title: 'How to Sing Riffs, Melismas and Runs Smoothly', language: 'en' },
+      {
+        videoId: 'ZqfO6j5gNoE',
+        title: 'How to Sing Riffs, Melismas and Runs Smoothly',
+        language: 'en',
+      },
     ],
     sources: [{ label: 'Melisma (Wikipedia)', url: 'https://es.wikipedia.org/wiki/Melisma' }],
   },
   {
     id: 'falsete',
     name: 'Falsete',
-    color: '#B98BFF',
+    category: 'Registros',
+    color: '#7445D6',
     level: 'Intermedio',
     summary: 'Un registro ligero y aireado que permite llegar a notas agudas con suavidad.',
     whatIs:
@@ -237,12 +259,33 @@ export const techniques: Technique[] = [
       },
     ],
     tutorials: [
-      { videoId: '2QVVaE2wYZk', title: 'Cómo cantar falsete o voz de cabeza desde cero', language: 'es' },
-      { videoId: 'o94BpiOLcRE', title: 'Ejercicios de canto: falsete o voz de cabeza', language: 'es' },
-      { videoId: 'gH_QhApA-ao', title: 'Mariachi vocal tutorial: how to sing falsetto', language: 'en' },
+      {
+        videoId: '2QVVaE2wYZk',
+        title: 'Cómo cantar falsete o voz de cabeza desde cero',
+        language: 'es',
+      },
+      {
+        videoId: 'o94BpiOLcRE',
+        title: 'Ejercicios de canto: falsete o voz de cabeza',
+        language: 'es',
+      },
+      {
+        videoId: 'gH_QhApA-ao',
+        title: 'Mariachi vocal tutorial: how to sing falsetto',
+        language: 'en',
+      },
     ],
     sources: [{ label: 'Falsete (Wikipedia)', url: 'https://es.wikipedia.org/wiki/Falsete' }],
   },
+];
+
+export const techniques: Technique[] = [...baseTechniques, ...extraTechniques];
+
+export const categories: TechniqueCategory[] = [
+  'Adornos y afinación',
+  'Registros',
+  'Color y emisión',
+  'Articulación y dinámica',
 ];
 
 export const techniqueById = (id: string) => techniques.find((t) => t.id === id);

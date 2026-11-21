@@ -37,7 +37,10 @@ export function Pill({
       accessibilityState={onPress ? { selected: !!active } : undefined}
       style={({ pressed }) => [
         styles.pill,
-        { borderColor: active ? c : colors.border, backgroundColor: active ? `${c}2E` : colors.surface },
+        {
+          borderColor: active ? c : colors.border,
+          backgroundColor: active ? `${c}1F` : colors.surface,
+        },
         pressed && { opacity: 0.75 },
       ]}
     >
@@ -58,13 +61,17 @@ export function LinkButton({
   icon?: string;
   tone?: 'default' | 'spotify' | 'youtube';
 }) {
-  const bg = tone === 'spotify' ? '#1DB954' : tone === 'youtube' ? '#FF3D3D' : colors.surfaceAlt;
-  const fg = tone === 'default' ? colors.text : '#0B0B0B';
+  const bg = tone === 'spotify' ? '#14833B' : tone === 'youtube' ? '#D92D20' : colors.surfaceAlt;
+  const fg = tone === 'default' ? colors.text : '#FFFFFF';
   return (
     <Pressable
       accessibilityRole="link"
       onPress={() => openUrl(url)}
-      style={({ pressed }) => [styles.linkBtn, { backgroundColor: bg }, pressed && { opacity: 0.8 }]}
+      style={({ pressed }) => [
+        styles.linkBtn,
+        { backgroundColor: bg },
+        pressed && { opacity: 0.8 },
+      ]}
     >
       <Text style={[styles.linkText, { color: fg }]}>
         {icon ? `${icon}  ` : ''}

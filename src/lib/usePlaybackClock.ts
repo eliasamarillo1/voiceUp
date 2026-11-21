@@ -29,10 +29,7 @@ export function usePlaybackClock(duration: number, initial = 0) {
     return () => clearInterval(id);
   }, [playing, duration]);
 
-  const seek = useCallback(
-    (t: number) => setTime(Math.max(0, Math.min(duration, t))),
-    [duration],
-  );
+  const seek = useCallback((t: number) => setTime(Math.max(0, Math.min(duration, t))), [duration]);
   const toggle = useCallback(() => {
     setPlaying((p) => {
       if (!p) setTime((t) => (t >= duration ? 0 : t));

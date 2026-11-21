@@ -24,10 +24,7 @@ export function SongMap({
 
   return (
     <View>
-      <View
-        style={styles.wrap}
-        onLayout={(e) => setWidth(e.nativeEvent.layout.width || 1)}
-      >
+      <View style={styles.wrap} onLayout={(e) => setWidth(e.nativeEvent.layout.width || 1)}>
         <View style={styles.markers}>
           {song.occurrences.map((o, i) => {
             const t = techniqueById(o.techniqueId);

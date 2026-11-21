@@ -1,13 +1,7 @@
 // Modelo de datos de VoiceUp.
 // Todos los tiempos están en segundos desde el inicio de la grabación de referencia.
 
-export type SectionType =
-  | 'intro'
-  | 'estrofa'
-  | 'preestribillo'
-  | 'estribillo'
-  | 'puente'
-  | 'final';
+export type SectionType = 'intro' | 'estrofa' | 'preestribillo' | 'estribillo' | 'puente' | 'final';
 
 export interface Section {
   type: SectionType;
@@ -71,6 +65,8 @@ export interface Song {
   occurrences: Occurrence[];
   /** Partitura en MusicXML (solo el fragmento analizado). */
   sheetMusic?: { title: string; musicXml: string };
+  /** Vídeo de YouTube con una interpretación de la canción, para escucharla dentro de la app. */
+  video: { videoId: string; title: string };
   /** Consulta de búsqueda para abrir la canción en Spotify y YouTube. */
   listenQuery: string;
   sources: SourceLink[];
@@ -88,9 +84,16 @@ export interface Exercise {
   steps: string[];
 }
 
+export type TechniqueCategory =
+  | 'Adornos y afinación'
+  | 'Registros'
+  | 'Color y emisión'
+  | 'Articulación y dinámica';
+
 export interface Technique {
   id: string;
   name: string;
+  category: TechniqueCategory;
   color: string;
   level: 'Básico' | 'Intermedio' | 'Avanzado';
   summary: string;

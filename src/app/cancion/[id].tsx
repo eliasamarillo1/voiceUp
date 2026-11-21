@@ -8,8 +8,9 @@ import { usePlaybackClock } from '../../lib/usePlaybackClock';
 import { tokenizeLine, transposeKey, transposeNote } from '../../lib/music';
 import { SongMap } from '../../components/SongMap';
 import { SheetMusic } from '../../components/SheetMusic';
+import { YouTubeEmbed } from '../../components/YouTubeEmbed';
 import { Body, Card, LinkButton, Page, Pill } from '../../components/ui';
-import { colors, formatTime, radius, sectionColors } from '../../theme';
+import { colors, formatTime, radius, sectionColors, sectionInk } from '../../theme';
 
 const TABS = [
   { id: 'letra', label: 'Letra' },
@@ -35,12 +36,24 @@ export default function SongScreen() {
       </Page>
     );
   }
-  return <SongFolder song={song} initialTime={Number(params.t) || 0} initialTab={params.tab as TabId} />;
+  return (
+    <SongFolder song={song} initialTime={Number(params.t) || 0} initialTab={params.tab as TabId} />
+  );
 }
 
-function SongFolder({ song, initialTime, initialTab }: { song: Song; initialTime: number; initialTab?: TabId }) {
+function SongFolder({
+  song,
+  initialTime,
+  initialTab,
+}: {
+  song: Song;
+  initialTime: number;
+  initialTab?: TabId;
+}) {
   const clock = usePlaybackClock(song.duration, initialTime);
-  const [tab, setTab] = useState<TabId>(TABS.some((t) => t.id === initialTab) ? initialTab! : 'letra');
+  const [tab, setTab] = useState<TabId>(
+    TABS.some((t) => t.id === initialTab) ? initialTab! : 'letra',
+  );
 
   const section = song.sections.find((s) => clock.time >= s.start && clock.time < s.end);
   const openOccurrence = (o: Occurrence) =>
@@ -66,8 +79,27 @@ function SongFolder({ song, initialTime, initialTab }: { song: Song; initialTime
             <Stat label="Nivel" value={song.difficulty} />
           </View>
 
+          <View style={styles.listen}>
+            <View style={styles.listenVideo}>
+              <YouTubeEmbed videoId={song.video.videoId} title={song.video.title} />
+            </View>
+            <View style={styles.listenText}>
+              <Text style={styles.listenTitle}>Escucha la canción</Text>
+              <Text style={styles.listenSub}>{song.video.title}</Text>
+              <Text style={styles.listenHint}>
+                Dale al play en el vídeo para oírla. Mientras, sigue la letra y los recursos vocales
+                aquí debajo.
+              </Text>
+            </View>
+          </View>
+
           <View style={{ marginTop: 24 }}>
-            <SongMap song={song} time={clock.time} onSeek={clock.seek} onOccurrence={openOccurrence} />
+            <SongMap
+              song={song}
+              time={clock.time}
+              onSeek={clock.seek}
+              onOccurrence={openOccurrence}
+            />
             <Text style={styles.mapHint}>
               Toca el mapa para saltar a una parte. Los puntos de colores son los recursos vocales.
             </Text>
@@ -76,14 +108,24 @@ function SongFolder({ song, initialTime, initialTab }: { song: Song; initialTime
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 20 }}>
             <View style={styles.tabs}>
               {TABS.map((t) => (
-                <Pill key={t.id} label={t.label} active={tab === t.id} onPress={() => setTab(t.id)} />
+                <Pill
+                  key={t.id}
+                  label={t.label}
+                  active={tab === t.id}
+                  onPress={() => setTab(t.id)}
+                />
               ))}
             </View>
           </ScrollView>
 
           <View style={{ marginTop: 20 }}>
             {tab === 'letra' && (
-              <LyricsTab song={song} time={clock.time} onSeek={clock.seek} onOccurrence={openOccurrence} />
+              <LyricsTab
+                song={song}
+                time={clock.time}
+                onSeek={clock.seek}
+                onOccurrence={openOccurrence}
+              />
             )}
             {tab === 'recursos' && (
               <TechniquesTab
@@ -95,7 +137,9 @@ function SongFolder({ song, initialTime, initialTab }: { song: Song; initialTime
                 }}
               />
             )}
-            {tab === 'estructura' && <StructureTab song={song} time={clock.time} onSeek={clock.seek} />}
+            {tab === 'estructura' && (
+              <StructureTab song={song} time={clock.time} onSeek={clock.seek} />
+            )}
             {tab === 'tonos' && <KeysTab song={song} />}
             {tab === 'partitura' && <SheetTab song={song} />}
             {tab === 'info' && <InfoTab song={song} />}
@@ -119,7 +163,7 @@ function SongFolder({ song, initialTime, initialTab }: { song: Song; initialTime
               {section?.label ?? 'Fin'} · {formatTime(clock.time)} / {formatTime(song.duration)}
             </Text>
             <Text style={styles.playerHint} numberOfLines={1}>
-              Reproducción simulada para seguir la letra. La canción completa está en "Escuchar".
+              Modo letra: avanza la letra sin sonido. El sonido está en el vídeo de arriba.
             </Text>
           </View>
         </Page>
@@ -157,11 +201,14 @@ function LyricsTab({
         const sec = song.sections.find((s) => line.start >= s.start && line.start < s.end);
         const showSection = sec && sec.label + sec.start !== lastSection;
         if (sec) lastSection = sec.label + sec.start;
-        const tokens = tokenizeLine(line.text, song.occurrences.filter((o) => o.line === i));
+        const tokens = tokenizeLine(
+          line.text,
+          song.occurrences.filter((o) => o.line === i),
+        );
         return (
           <View key={i}>
             {showSection && (
-              <Text style={[styles.lyricSection, { color: sectionColors[sec.type] === '#4B4566' ? colors.faint : sectionColors[sec.type] }]}>
+              <Text style={[styles.lyricSection, { color: sectionInk[sec.type] }]}>
                 {sec.label}
               </Text>
             )}
@@ -169,7 +216,13 @@ function LyricsTab({
               onPress={() => onSeek(line.start)}
               style={[styles.lyricLine, active && styles.lyricActive]}
             >
-              <Text style={[styles.lyricText, past && { color: colors.faint }, active && { color: colors.text }]}>
+              <Text
+                style={[
+                  styles.lyricText,
+                  past && { color: colors.faint },
+                  active && { color: colors.text },
+                ]}
+              >
                 {tokens.map((tk, j) => {
                   const sp = j < tokens.length - 1 ? ' ' : '';
                   if (!tk.mark) return tk.raw + sp;
@@ -208,7 +261,8 @@ function LyricsTab({
 function TechniquesTab({ song, onPlay }: { song: Song; onPlay: (t: number) => void }) {
   const groups = useMemo(() => {
     const map = new Map<string, Occurrence[]>();
-    for (const o of song.occurrences) map.set(o.techniqueId, [...(map.get(o.techniqueId) ?? []), o]);
+    for (const o of song.occurrences)
+      map.set(o.techniqueId, [...(map.get(o.techniqueId) ?? []), o]);
     return [...map.entries()];
   }, [song]);
 
@@ -219,7 +273,9 @@ function TechniquesTab({ song, onPlay }: { song: Song; onPlay: (t: number) => vo
         return (
           <Card key={id} style={{ borderLeftWidth: 4, borderLeftColor: t.color }}>
             <Pressable
-              onPress={() => router.push({ pathname: '/recurso/[id]', params: { id, song: song.id } })}
+              onPress={() =>
+                router.push({ pathname: '/recurso/[id]', params: { id, song: song.id } })
+              }
               accessibilityRole="link"
               style={styles.techHead}
             >
@@ -238,7 +294,9 @@ function TechniquesTab({ song, onPlay }: { song: Song; onPlay: (t: number) => vo
                     <Text style={styles.momentNote}>{o.note}</Text>
                   </View>
                   <Text style={styles.badge}>
-                    {o.origin === 'revisado' ? 'Revisado' : `Automático · ${Math.round(o.confidence * 100)} %`}
+                    {o.origin === 'revisado'
+                      ? 'Revisado'
+                      : `Automático · ${Math.round(o.confidence * 100)} %`}
                   </Text>
                 </Pressable>
               ))}
@@ -254,7 +312,15 @@ function TechniquesTab({ song, onPlay }: { song: Song; onPlay: (t: number) => vo
   );
 }
 
-function StructureTab({ song, time, onSeek }: { song: Song; time: number; onSeek: (t: number) => void }) {
+function StructureTab({
+  song,
+  time,
+  onSeek,
+}: {
+  song: Song;
+  time: number;
+  onSeek: (t: number) => void;
+}) {
   return (
     <View style={{ gap: 10 }}>
       {song.sections.map((s, i) => {
@@ -305,12 +371,15 @@ function KeysTab({ song }: { song: Song }) {
         <View style={styles.transposer}>
           <Pill label="− 1" onPress={() => setShift(shift - 1)} />
           <Text style={styles.shift}>
-            {shift === 0 ? 'Original' : `${shift > 0 ? '+' : ''}${shift} semitono${Math.abs(shift) === 1 ? '' : 's'}`}
+            {shift === 0
+              ? 'Original'
+              : `${shift > 0 ? '+' : ''}${shift} semitono${Math.abs(shift) === 1 ? '' : 's'}`}
           </Text>
           <Pill label="+ 1" onPress={() => setShift(shift + 1)} />
         </View>
         <Text style={styles.rangeText}>
-          Rango: {transposeNote(song.vocalRange.low, shift)} – {transposeNote(song.vocalRange.high, shift)}
+          Rango: {transposeNote(song.vocalRange.low, shift)} –{' '}
+          {transposeNote(song.vocalRange.high, shift)}
         </Text>
       </Card>
     </View>
@@ -323,8 +392,8 @@ function SheetTab({ song }: { song: Song }) {
       <Card>
         <Text style={styles.cardHeading}>Partitura en preparación</Text>
         <Body>
-          La partitura de la voz se generará a partir de la melodía detectada. En este prototipo solo
-          "Amazing Grace" tiene un fragmento de ejemplo.
+          La partitura de la voz se generará a partir de la melodía detectada. En este prototipo
+          solo "Amazing Grace" tiene un fragmento de ejemplo.
         </Body>
       </Card>
     );
@@ -372,8 +441,16 @@ function ListenTab({ song }: { song: Song }) {
       <Card style={{ gap: 12 }}>
         <Text style={styles.cardHeading}>Escucha la canción completa</Text>
         <View style={styles.row}>
-          <LinkButton label="Abrir en Spotify" url={spotifySearchUrl(song.listenQuery)} tone="spotify" />
-          <LinkButton label="Abrir en YouTube" url={youtubeSearchUrl(song.listenQuery)} tone="youtube" />
+          <LinkButton
+            label="Abrir en Spotify"
+            url={spotifySearchUrl(song.listenQuery)}
+            tone="spotify"
+          />
+          <LinkButton
+            label="Abrir en YouTube"
+            url={youtubeSearchUrl(song.listenQuery)}
+            tone="youtube"
+          />
         </View>
       </Card>
       <Card style={{ gap: 12 }}>
@@ -384,8 +461,8 @@ function ListenTab({ song }: { song: Song }) {
           ))}
         </View>
         <Text style={styles.footNote}>
-          El análisis de esta canción es un ejemplo para el prototipo: los tiempos y los recursos son
-          ilustrativos.
+          El análisis de esta canción es un ejemplo para el prototipo: los tiempos y los recursos
+          son ilustrativos.
         </Text>
       </Card>
     </View>
@@ -394,7 +471,13 @@ function ListenTab({ song }: { song: Song }) {
 
 const styles = StyleSheet.create({
   back: { color: colors.muted, fontSize: 15, fontWeight: '600', paddingTop: 24, paddingBottom: 16 },
-  kicker: { color: colors.accent, fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+  kicker: {
+    color: colors.accent,
+    fontSize: 13,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   title: { color: colors.text, fontSize: 38, fontWeight: '900', letterSpacing: -1, marginTop: 6 },
   artist: { color: colors.muted, fontSize: 17, marginTop: 4 },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 20 },
@@ -408,9 +491,32 @@ const styles = StyleSheet.create({
   },
   statLabel: { color: colors.faint, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
   statValue: { color: colors.text, fontSize: 15, fontWeight: '700', marginTop: 2 },
+  listen: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginTop: 24,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 12,
+  },
+  listenVideo: { flexGrow: 1, flexBasis: 320, maxWidth: 520 },
+  listenText: { flexGrow: 1, flexBasis: 220, justifyContent: 'center', padding: 8 },
+  listenTitle: { color: colors.text, fontSize: 20, fontWeight: '900' },
+  listenSub: { color: colors.muted, fontSize: 14, marginTop: 4 },
+  listenHint: { color: colors.faint, fontSize: 13, lineHeight: 19, marginTop: 10 },
   mapHint: { color: colors.faint, fontSize: 12, marginTop: 8 },
   tabs: { flexDirection: 'row', gap: 8 },
-  lyricSection: { fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, marginTop: 18, marginBottom: 4 },
+  lyricSection: {
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: 18,
+    marginBottom: 4,
+  },
   lyricLine: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.md },
   lyricActive: { backgroundColor: colors.surfaceAlt },
   lyricText: { color: colors.muted, fontSize: 22, lineHeight: 32, fontWeight: '700' },
@@ -449,7 +555,13 @@ const styles = StyleSheet.create({
   keyName: { color: colors.text, fontSize: 26, fontWeight: '900' },
   cardHeading: { color: colors.text, fontSize: 17, fontWeight: '800', marginBottom: 6 },
   transposer: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 14 },
-  shift: { color: colors.text, fontWeight: '800', fontSize: 15, minWidth: 120, textAlign: 'center' },
+  shift: {
+    color: colors.text,
+    fontWeight: '800',
+    fontSize: 15,
+    minWidth: 120,
+    textAlign: 'center',
+  },
   rangeText: { color: colors.muted, marginTop: 12, fontSize: 14 },
   infoRow: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
   infoKey: { color: colors.faint, fontSize: 14, width: 170 },

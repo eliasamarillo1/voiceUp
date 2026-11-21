@@ -32,7 +32,7 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 64 }}>
-      <View style={[styles.hero, { backgroundColor: `${t.color}22` }]}>
+      <View style={[styles.hero, { backgroundColor: `${t.color}14` }]}>
         <Page>
           <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}>
             <Text style={styles.back}>← {fromSong ? fromSong.title : 'Volver'}</Text>
@@ -89,7 +89,9 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
           ))}
         </View>
 
-        <SectionTitle hint="Elige uno y practícalo unos minutos cada día">Ejercicios para practicarlo</SectionTitle>
+        <SectionTitle hint="Elige uno y practícalo unos minutos cada día">
+          Ejercicios para practicarlo
+        </SectionTitle>
         <View style={{ gap: 10 }}>
           {t.exercises.map((ex, i) => {
             const isOpen = open === i;
@@ -118,13 +120,17 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
           })}
         </View>
 
-        <SectionTitle hint="Se reproducen aquí mismo, sin salir de la app">Vídeos tutoriales</SectionTitle>
+        <SectionTitle hint="Se reproducen aquí mismo, sin salir de la app">
+          Vídeos tutoriales
+        </SectionTitle>
         <View style={styles.videos}>
           {t.tutorials.map((v) => (
             <View key={v.videoId} style={styles.video}>
               <YouTubeEmbed videoId={v.videoId} title={v.title} />
               <Text style={styles.videoTitle}>{v.title}</Text>
-              <Text style={styles.videoMeta}>{v.language === 'es' ? 'En español' : 'En inglés'}</Text>
+              <Text style={styles.videoMeta}>
+                {v.language === 'es' ? 'En español' : 'En inglés'}
+              </Text>
             </View>
           ))}
         </View>
@@ -140,7 +146,9 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
 
         {others.length > 0 && (
           <>
-            <SectionTitle>{fromSong ? 'También aparece en' : 'Canciones donde aparece'}</SectionTitle>
+            <SectionTitle>
+              {fromSong ? 'También aparece en' : 'Canciones donde aparece'}
+            </SectionTitle>
             <View style={{ gap: 8 }}>
               {others.map((s) => {
                 const first = s.occurrences.find((o) => o.techniqueId === t.id)!;
@@ -154,8 +162,8 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
                   >
                     <Text style={styles.songTitle}>{s.title}</Text>
                     <Text style={styles.momentNote}>
-                      {s.occurrences.filter((o) => o.techniqueId === t.id).length} veces · primera en «
-                      {first.word}»
+                      {s.occurrences.filter((o) => o.techniqueId === t.id).length} veces · primera
+                      en «{first.word}»
                     </Text>
                   </Pressable>
                 );
@@ -170,7 +178,11 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
             <LinkButton key={s.url} label={s.label} url={s.url} />
           ))}
           {t.tutorials.map((v) => (
-            <LinkButton key={v.videoId} label={`YouTube: ${v.title}`} url={`https://www.youtube.com/watch?v=${v.videoId}`} />
+            <LinkButton
+              key={v.videoId}
+              label={`YouTube: ${v.title}`}
+              url={`https://www.youtube.com/watch?v=${v.videoId}`}
+            />
           ))}
         </View>
       </Page>
@@ -183,7 +195,7 @@ const styles = StyleSheet.create({
   back: { color: colors.muted, fontSize: 15, fontWeight: '600', paddingTop: 24, paddingBottom: 20 },
   kicker: { fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
   title: { color: colors.text, fontSize: 44, fontWeight: '900', letterSpacing: -1, marginTop: 6 },
-  summary: { color: colors.text, fontSize: 18, lineHeight: 26, marginTop: 8, maxWidth: 640, opacity: 0.85 },
+  summary: { color: colors.muted, fontSize: 18, lineHeight: 26, marginTop: 8, maxWidth: 640 },
   moment: {
     flexDirection: 'row',
     gap: 14,
@@ -197,8 +209,14 @@ const styles = StyleSheet.create({
   momentLine: { color: colors.text, fontWeight: '700', fontSize: 15 },
   momentNote: { color: colors.muted, fontSize: 13, marginTop: 2 },
   step: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  stepNum: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
-  stepNumText: { color: colors.bg, fontWeight: '900' },
+  stepNum: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNumText: { color: '#FFFFFF', fontWeight: '900' },
   stepText: { color: colors.muted, fontSize: 15, lineHeight: 22, flex: 1, paddingTop: 2 },
   exHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   exTitle: { color: colors.text, fontSize: 16, fontWeight: '800', flex: 1 },

@@ -32,12 +32,23 @@ export function SheetMusic({ musicXml }: { musicXml: string }) {
 
   return (
     <View style={styles.paper}>
-      {error ? <Text style={styles.error}>{error}</Text> : <div ref={ref} style={{ width: '100%' }} />}
+      {error ? (
+        <Text style={styles.error}>{error}</Text>
+      ) : (
+        <div ref={ref} style={{ width: '100%' }} />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  paper: { backgroundColor: '#FFFDF7', borderRadius: radius.md, padding: 12, overflow: 'hidden' },
-  error: { color: colors.bg },
+  paper: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.md,
+    padding: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  error: { color: colors.text },
 });

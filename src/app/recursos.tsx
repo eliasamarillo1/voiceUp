@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { songs } from '../data/songs';
-import { techniques } from '../data/techniques';
+import { categories, techniques } from '../data/techniques';
 import { Page } from '../components/ui';
 import { colors, radius } from '../theme';
 
@@ -17,25 +17,41 @@ export default function TechniquesLibrary() {
         <Text style={styles.sub}>
           Cada recurso tiene su explicación, ejercicios para practicarlo y vídeos tutoriales.
         </Text>
-        <View style={styles.grid}>
-          {techniques.map((t) => {
-            const count = songs.filter((s) => s.occurrences.some((o) => o.techniqueId === t.id)).length;
-            return (
-              <Pressable
-                key={t.id}
-                accessibilityRole="link"
-                onPress={() => router.push({ pathname: '/recurso/[id]', params: { id: t.id } })}
-                style={({ pressed }) => [styles.card, { borderTopColor: t.color }, pressed && { opacity: 0.8 }]}
-              >
-                <Text style={[styles.name, { color: t.color }]}>{t.name}</Text>
-                <Text style={styles.summary}>{t.summary}</Text>
-                <Text style={styles.meta}>
-                  {t.level} · {t.exercises.length} ejercicios · {t.tutorials.length} vídeos · en {count} canciones
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        {categories.map((cat) => (
+          <View key={cat} style={{ marginBottom: 28 }}>
+            <Text style={styles.cat}>{cat}</Text>
+            <View style={styles.grid}>
+              {techniques
+                .filter((t) => t.category === cat)
+                .map((t) => {
+                  const count = songs.filter((s) =>
+                    s.occurrences.some((o) => o.techniqueId === t.id),
+                  ).length;
+                  return (
+                    <Pressable
+                      key={t.id}
+                      accessibilityRole="link"
+                      onPress={() =>
+                        router.push({ pathname: '/recurso/[id]', params: { id: t.id } })
+                      }
+                      style={({ pressed }) => [
+                        styles.card,
+                        { borderTopColor: t.color },
+                        pressed && { opacity: 0.8 },
+                      ]}
+                    >
+                      <Text style={[styles.name, { color: t.color }]}>{t.name}</Text>
+                      <Text style={styles.summary}>{t.summary}</Text>
+                      <Text style={styles.meta}>
+                        {t.level} · {t.exercises.length} ejercicios · {t.tutorials.length} vídeos ·
+                        en {count} canciones
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+            </View>
+          </View>
+        ))}
       </Page>
     </ScrollView>
   );
@@ -53,8 +69,18 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: 18,
     borderTopWidth: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   name: { fontSize: 22, fontWeight: '900' },
+  cat: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
   summary: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 6 },
   meta: { color: colors.faint, fontSize: 12, marginTop: 12, fontWeight: '600' },
 });
