@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 import { searchSongs, spotifySearchUrl, youtubeSearchUrl } from '../data/songs';
 import { techniqueById } from '../data/techniques';
 import { TechniqueExplorer } from '../components/TechniqueExplorer';
+import { PixelBee } from '../components/PixelBee';
 
 import type { Song } from '../data/types';
 import { Card, LinkButton, Page, Pill, SectionTitle } from '../components/ui';
@@ -127,7 +128,10 @@ export default function Home() {
 
         {results.length === 0 && !!query && (
           <Card style={{ gap: 12 }}>
-            <Text style={styles.emptyTitle}>Esta canción todavía no está analizada</Text>
+            <View style={styles.beeNote}>
+              <PixelBee size={2} still />
+              <Text style={styles.emptyTitle}>Esta canción todavía no está analizada</Text>
+            </View>
             <Text style={styles.emptyText}>
               En la versión final, VoiceUp analizará automáticamente cualquier canción que busques:
               estructura, tonalidad, letra sincronizada y recursos vocales. De momento puedes
@@ -282,6 +286,7 @@ const styles = StyleSheet.create({
   techDot: { width: 6, height: 6, borderRadius: 3 },
   techTagText: { fontSize: 12, fontWeight: '700' },
   more: { color: colors.faint, fontSize: 12, fontWeight: '700', alignSelf: 'center' },
+  beeNote: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   emptyTitle: { color: colors.text, fontSize: 18, fontWeight: '800' },
   emptyText: { color: colors.muted, fontSize: 15, lineHeight: 22 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
