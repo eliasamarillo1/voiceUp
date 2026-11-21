@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { songById, songs } from '../../data/songs';
 import { techniqueById } from '../../data/techniques';
 import type { Technique } from '../../data/types';
+import { tutorialsFor } from '../../data/tutorials';
 import { VideoCarousel } from '../../components/VideoCarousel';
 import { Body, Card, LinkButton, Page, SectionTitle } from '../../components/ui';
 import { fonts, colors, formatTime, radius } from '../../theme';
@@ -124,7 +125,7 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
           Vídeos tutoriales
         </SectionTitle>
         <VideoCarousel
-          videos={t.tutorials}
+          videos={tutorialsFor(t)}
           searchQuery={`${t.name} canto tutorial`}
           accent={t.color}
         />
