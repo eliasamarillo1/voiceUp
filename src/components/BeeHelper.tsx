@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { usePathname } from 'expo-router';
 import { BEE_COLS, BEE_ROWS, PixelBee, type BeeFrame } from './PixelBee';
+import { AbiChat } from './AbiChat';
+import type { ChatTurn } from '../lib/abi';
 import { fonts, colors, radius } from '../theme';
 
 type Page = 'inicio' | 'cancion' | 'recurso' | 'recursos' | 'calentamiento';
@@ -19,7 +21,7 @@ type Page = 'inicio' | 'cancion' | 'recurso' | 'recursos' | 'calentamiento';
 // Pequeñas aclaraciones de Abi para cada pantalla.
 const TIPS: Record<Page, string[]> = {
   inicio: [
-    '¡Hola! Soy Abi. Vuelo por aquí: tócame cuando quieras un consejo. Busca una canción por su título, su artista o un trozo de la letra.',
+    '¡Hola! Soy Abi. Vuelo por aquí: tócame cuando quieras un consejo, o pulsa «Pregúntame» para hacerme cualquier duda sobre canto. Busca una canción por su título, su artista o un trozo de la letra.',
     'Las etiquetas de colores de cada canción son sus recursos vocales. Cada recurso tiene siempre el mismo color en toda la app.',
     'Si una canción sale como «todavía no está analizada», es que aún no tenemos su estudio. En la versión final se analizará sola; mientras, puedes escucharla en Spotify o YouTube.',
     'Los tres accesos de arriba te llevan a las canciones, a los recursos vocales o al calentamiento.',
@@ -71,6 +73,8 @@ function seenBefore(page: Page) {
 }
 
 const PX = 3; // tamaño de cada píxel de Abi
+const CONTENT_W = 920; // ancho máximo de la columna de contenido (ver Page en ui.tsx)
+const PEEK = 0.6; // en móvil, parte de Abi que se asoma desde el borde
 const BEE_W = BEE_COLS * PX;
 const BEE_H = BEE_ROWS * PX;
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
@@ -80,7 +84,8 @@ const rand = (a: number, b: number) => a + Math.random() * (b - a);
  * corazones y te cuenta un consejo sobre la pantalla en la que estás.
  */
 export function BeeHelper() {
-  const page = pageFor(usePathname());
+  const path = usePathname();
+  const page = pageFor(path);
   const tips = TIPS[page];
   const { width, height } = useWindowDimensions();
 
@@ -101,6 +106,8 @@ export function BeeHelper() {
   const [beePos, setBeePos] = useState(current.current);
   const [reduceMotion, setReduceMotion] = useState(false);
   const nextTip = useRef(0);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [turns, setTurns] = useState<ChatTurn[]>([]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled?.()
@@ -116,6 +123,18 @@ export function BeeHelper() {
     minY: 70,
     maxY: Math.max(70, height - BEE_H - bottomSpace),
   };
+
+  // Abi vuela solo por los laterales, nunca por encima de los textos. El contenido de cada
+  // pantalla ocupa una columna central de hasta CONTENT_W px; Abi se queda en el margen de su lado.
+  // Si no hay margen (móvil), se asoma desde el borde derecho y solo sube y baja.
+  const gutter = (width - Math.min(CONTENT_W, width)) / 2 + 8;
+  const wide = gutter >= BEE_W + 8;
+  const onRightSide = current.current.x + BEE_W / 2 >= width / 2;
+  const lane = !wide
+    ? { minX: width - BEE_W * PEEK, maxX: width - BEE_W * PEEK }
+    : onRightSide
+      ? { minX: width - gutter, maxX: width - BEE_W - 8 }
+      : { minX: 8, maxX: gutter - BEE_W };
 
   // Aleteo y parpadeo.
   useEffect(() => {
@@ -184,10 +203,10 @@ export function BeeHelper() {
 
   // Paseo libre por la pantalla mientras no está hablando.
   useEffect(() => {
-    if (reduceMotion || tip !== null) return;
+    if (reduceMotion || tip !== null || chatOpen) return;
     let timer: ReturnType<typeof setTimeout>;
     const wander = () => {
-      flyTo(rand(bounds.minX, bounds.maxX), rand(bounds.minY, bounds.maxY), () => {
+      flyTo(rand(lane.minX, lane.maxX), rand(bounds.minY, bounds.maxY), () => {
         timer = setTimeout(wander, rand(2500, 5500));
       });
     };
@@ -199,19 +218,20 @@ export function BeeHelper() {
         setBeePos(v);
       });
     };
-  }, [reduceMotion, tip, flyTo, pos, bounds.minX, bounds.maxX, bounds.minY, bounds.maxY]);
+  }, [reduceMotion, tip, chatOpen, flyTo, pos, lane.minX, lane.maxX, bounds.minY, bounds.maxY]);
 
-  // Si cambia el tamaño de la ventana, que no se quede fuera.
+  // Si cambia el tamaño de la ventana, que vuelva a su lateral y no se quede fuera.
   useEffect(() => {
+    if (chatOpen) return;
     const { x, y } = current.current;
-    if (x > bounds.maxX || y > bounds.maxY) {
-      const nx = Math.min(x, bounds.maxX);
+    if (x < lane.minX || x > lane.maxX || y > bounds.maxY) {
+      const nx = Math.min(Math.max(x, lane.minX), lane.maxX);
       const ny = Math.min(y, bounds.maxY);
       current.current = { x: nx, y: ny };
       pos.setValue({ x: nx, y: ny });
       setBeePos({ x: nx, y: ny });
     }
-  }, [bounds.maxX, bounds.maxY, pos]);
+  }, [lane.minX, lane.maxX, bounds.maxY, pos, chatOpen]);
 
   // La primera vez que visitas una pantalla, Abi se acerca y te saluda.
   useEffect(() => {
@@ -232,6 +252,23 @@ export function BeeHelper() {
     const t = setTimeout(() => setTip(null), 9000);
     return () => clearTimeout(t);
   }, [tip]);
+
+  const openChat = () => {
+    setTip(null);
+    setChatOpen(true);
+    // Abi se posa justo encima de la ventana del chat.
+    const narrow = width < 520;
+    const panelH = Math.min(540, height - bottomSpace - (narrow ? 70 : 90));
+    const x = Math.max(bounds.minX, width - (narrow ? 8 : 20) - BEE_W - 12);
+    const y = Math.max(bounds.minY - 60, height - bottomSpace - panelH - BEE_H + 6);
+    if (reduceMotion) {
+      current.current = { x, y };
+      pos.setValue({ x, y });
+      setBeePos({ x, y });
+    } else {
+      pos.stopAnimation(() => flyTo(x, y));
+    }
+  };
 
   const onTouch = () => {
     pos.stopAnimation((v) => {
@@ -264,6 +301,7 @@ export function BeeHelper() {
         useNativeDriver: false,
       }),
     ]).start(() => setHappy(false));
+    if (chatOpen) return; // con el chat abierto, Abi solo se alegra
     const i = nextTip.current % tips.length;
     nextTip.current = i + 1;
     setTip(i);
@@ -280,12 +318,12 @@ export function BeeHelper() {
 
   // El consejo aparece al lado de Abi, hacia el centro de la pantalla.
   const onRight = beePos.x > width / 2;
-  const cardW = Math.min(280, width - 32);
+  const cardW = Math.min(330, width - 32);
   const cardLeft = Math.max(
     16,
     Math.min(width - cardW - 16, onRight ? beePos.x - cardW - 8 : beePos.x + BEE_W + 8),
   );
-  const cardTop = Math.max(16, Math.min(height - bottomSpace - 190, beePos.y - 20));
+  const cardTop = Math.max(16, Math.min(height - bottomSpace - 210, beePos.y - 20));
 
   return (
     <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
@@ -308,6 +346,9 @@ export function BeeHelper() {
               >
                 <Text style={styles.btnGhostText}>Cerrar</Text>
               </Pressable>
+              <Pressable onPress={openChat} accessibilityRole="button" style={styles.btnSoft}>
+                <Text style={styles.btnSoftText}>Pregúntame</Text>
+              </Pressable>
               <Pressable
                 onPress={() => {
                   const n = (tip + 1) % tips.length;
@@ -322,6 +363,15 @@ export function BeeHelper() {
             </View>
           </View>
         </View>
+      )}
+      {chatOpen && (
+        <AbiChat
+          path={path}
+          turns={turns}
+          setTurns={setTurns}
+          onClose={() => setChatOpen(false)}
+          bottomSpace={bottomSpace}
+        />
       )}
       <Animated.View
         pointerEvents="box-none"
@@ -352,7 +402,7 @@ export function BeeHelper() {
         <Pressable
           onPress={onTouch}
           accessibilityRole="button"
-          accessibilityLabel="Abi, la abejita. Tócala para que te dé un consejo"
+          accessibilityLabel="Abi, la abejita. Tócala para que te dé un consejo o para preguntarle"
           hitSlop={8}
         >
           <View style={{ transform: [{ scaleX: facing }] }}>
@@ -402,6 +452,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
     marginTop: 12,
     gap: 8,
   },
@@ -413,6 +464,13 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
   btnText: { color: '#FFFFFF', fontSize: 14, fontFamily: fonts.bold },
+  btnSoft: {
+    backgroundColor: colors.accentSoft,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: radius.pill,
+  },
+  btnSoftText: { color: colors.frameDark, fontSize: 14, fontFamily: fonts.bold },
   btnGhost: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: radius.pill },
   btnGhostText: { color: colors.muted, fontSize: 14, fontFamily: fonts.bold },
 });

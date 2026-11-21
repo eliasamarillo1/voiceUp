@@ -1,0 +1,4 @@
+# Configuración mínima de Supabase para VoiceUp.
+# La función abi-chat es pública (la web no inicia sesión), así que no exige token de usuario.
+[functions.abi-chat]
+verify_jwt = false
