@@ -307,7 +307,7 @@ export function BeeHelper() {
   const cardTop = Math.max(16, Math.min(height - bottomSpace - 190, beePos.y - 20));
 
   return (
-    <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+    <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { overflow: 'hidden' }]}>
       {tip !== null && (
         <View
           style={[styles.card, { left: cardLeft, top: cardTop, width: cardW }]}
