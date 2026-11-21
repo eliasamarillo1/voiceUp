@@ -90,6 +90,15 @@ function SongFolder({
                 Dale al play en el vídeo para oírla. Mientras, sigue la letra y los recursos vocales
                 aquí debajo.
               </Text>
+              <Pressable
+                accessibilityRole="link"
+                onPress={() =>
+                  router.push({ pathname: '/calentamiento', params: { song: song.id } })
+                }
+                style={({ pressed }) => [styles.warmBtn, pressed && { opacity: 0.85 }]}
+              >
+                <Text style={styles.warmBtnText}>Calentar antes de cantar →</Text>
+              </Pressable>
             </View>
           </View>
 
@@ -507,6 +516,15 @@ const styles = StyleSheet.create({
   listenTitle: { color: colors.text, fontSize: 20, fontWeight: '900' },
   listenSub: { color: colors.muted, fontSize: 14, marginTop: 4 },
   listenHint: { color: colors.faint, fontSize: 13, lineHeight: 19, marginTop: 10 },
+  warmBtn: {
+    alignSelf: 'flex-start',
+    marginTop: 14,
+    backgroundColor: colors.accent,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: radius.pill,
+  },
+  warmBtnText: { color: '#FFFFFF', fontWeight: '800', fontSize: 14 },
   mapHint: { color: colors.faint, fontSize: 12, marginTop: 8 },
   tabs: { flexDirection: 'row', gap: 8 },
   lyricSection: {

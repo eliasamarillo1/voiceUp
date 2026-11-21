@@ -35,9 +35,14 @@ export default function Home() {
           <Text style={styles.logo}>
             Voice<Text style={{ color: colors.accent }}>Up</Text>
           </Text>
-          <Pressable onPress={() => router.push('/recursos')} accessibilityRole="link">
-            <Text style={styles.headerLink}>Recursos vocales</Text>
-          </Pressable>
+          <View style={styles.nav}>
+            <Pressable onPress={() => router.push('/calentamiento')} accessibilityRole="link">
+              <Text style={styles.headerLink}>Calentamiento</Text>
+            </Pressable>
+            <Pressable onPress={() => router.push('/recursos')} accessibilityRole="link">
+              <Text style={styles.headerLink}>Recursos</Text>
+            </Pressable>
+          </View>
         </View>
 
         <Text style={styles.hero}>¿Qué quieres cantar hoy?</Text>
@@ -58,6 +63,18 @@ export default function Home() {
             accessibilityLabel="Buscar canción"
           />
         </View>
+
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => router.push('/calentamiento')}
+          style={({ pressed }) => [styles.warmBanner, pressed && { opacity: 0.85 }]}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={styles.warmTitle}>¿Vas a cantar? Calienta la voz primero</Text>
+            <Text style={styles.warmText}>Rutina guiada con temporizador, de 6 o 10 minutos.</Text>
+          </View>
+          <Text style={styles.warmCta}>Empezar →</Text>
+        </Pressable>
 
         <View onLayout={(e) => setLibraryY(e.nativeEvent.layout.y)} />
         <SectionTitle
@@ -182,6 +199,21 @@ const styles = StyleSheet.create({
   },
   logo: { color: colors.text, fontSize: 24, fontWeight: '900', letterSpacing: -0.5 },
   headerLink: { color: colors.muted, fontSize: 15, fontWeight: '600' },
+  nav: { flexDirection: 'row', gap: 20 },
+  warmBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 16,
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.lg,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  warmTitle: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  warmText: { color: colors.muted, fontSize: 14, marginTop: 2 },
+  warmCta: { color: colors.accent, fontSize: 15, fontWeight: '800' },
   hero: {
     color: colors.text,
     fontSize: 40,
