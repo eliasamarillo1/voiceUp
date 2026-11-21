@@ -54,7 +54,7 @@ export default function Home() {
         </View>
 
         <View style={[styles.heroWrap, wide && styles.heroWide]}>
-          <IrisWindow width={wide ? 260 : 200} height={wide ? 300 : 230} />
+          <IrisWindow width={wide ? 280 : 220} />
           <View style={[styles.heroText, wide && { alignItems: 'flex-start' }]}>
             <Text
               style={[styles.hero, wide && { textAlign: 'left', fontSize: 50, lineHeight: 56 }]}
@@ -149,7 +149,7 @@ export default function Home() {
         {results.length === 0 && !!query && (
           <Card style={{ gap: 12 }}>
             <View style={styles.beeNote}>
-              <PixelBee size={2} still />
+              <PixelBee size={2} />
               <Text style={styles.emptyTitle}>Esta canción todavía no está analizada</Text>
             </View>
             <Text style={styles.emptyText}>
@@ -201,7 +201,11 @@ function SongCard({ song }: { song: Song }) {
         (hovered || pressed) && { transform: [{ translateY: -3 }] },
       ]}
     >
-      <Frame arch style={{ flex: 1 }} innerStyle={{ paddingTop: 30, alignItems: 'center' }}>
+      <Frame
+        corner={32}
+        style={{ aspectRatio: 1 }}
+        innerStyle={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}
+      >
         <Text style={styles.cardTitle}>{song.title}</Text>
         <Text style={styles.cardArtist}>{song.artist}</Text>
         <Text style={styles.cardMeta}>
@@ -245,7 +249,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   logo: { color: colors.frameDark, fontSize: 30, fontFamily: fonts.display, letterSpacing: 0.5 },
-  headerLink: { color: colors.text, fontSize: 18, fontFamily: fonts.bold },
+  headerLink: { color: colors.text, fontSize: 17, fontFamily: fonts.bold },
   nav: { flexDirection: 'row', gap: 20 },
   heroWrap: { alignItems: 'center', gap: 8, marginTop: 12 },
   heroWide: { flexDirection: 'row', gap: 40, justifyContent: 'center', marginTop: 24 },
@@ -260,7 +264,7 @@ const styles = StyleSheet.create({
   },
   heroSub: {
     color: colors.muted,
-    fontSize: 19,
+    fontSize: 18,
     fontFamily: fonts.regular,
     lineHeight: 26,
     marginTop: 10,
@@ -285,7 +289,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: colors.text,
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: fonts.medium,
     paddingVertical: 15,
     outlineStyle: 'none',
@@ -304,8 +308,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   doorTitle: { color: colors.text, fontSize: 21, fontFamily: fonts.display, marginTop: 6 },
-  doorText: { color: colors.muted, fontSize: 17, fontFamily: fonts.regular, lineHeight: 21 },
-  toggle: { color: colors.frameDark, fontSize: 16, fontFamily: fonts.bold },
+  doorText: { color: colors.muted, fontSize: 16, fontFamily: fonts.regular, lineHeight: 21 },
+  toggle: { color: colors.frameDark, fontSize: 15, fontFamily: fonts.bold },
   activeFilter: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -319,9 +323,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginBottom: 14,
   },
-  activeFilterText: { color: colors.text, fontSize: 16, fontFamily: fonts.bold },
+  activeFilterText: { color: colors.text, fontSize: 15, fontFamily: fonts.bold },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 18 },
-  card: { flexGrow: 1, flexBasis: 270 },
+  card: { flexGrow: 1, flexBasis: 270, maxWidth: 420 },
   miniMap: {
     flexDirection: 'row',
     alignSelf: 'stretch',
@@ -333,8 +337,8 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   cardTitle: { color: colors.text, fontSize: 25, fontFamily: fonts.display, textAlign: 'center' },
-  cardArtist: { color: colors.muted, fontSize: 17, fontFamily: fonts.medium, marginTop: 2 },
-  cardMeta: { color: colors.faint, fontSize: 15, fontFamily: fonts.regular, marginTop: 4 },
+  cardArtist: { color: colors.muted, fontSize: 16, fontFamily: fonts.medium, marginTop: 2 },
+  cardMeta: { color: colors.faint, fontSize: 14, fontFamily: fonts.regular, marginTop: 4 },
   techRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -354,10 +358,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   techDot: { width: 8, height: 8, borderRadius: 4 },
-  techTagText: { color: colors.text, fontSize: 15, fontFamily: fonts.bold },
-  more: { color: colors.faint, fontSize: 15, fontFamily: fonts.bold, alignSelf: 'center' },
+  techTagText: { color: colors.text, fontSize: 14, fontFamily: fonts.bold },
+  more: { color: colors.faint, fontSize: 14, fontFamily: fonts.bold, alignSelf: 'center' },
   beeNote: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   emptyTitle: { color: colors.text, fontSize: 22, fontFamily: fonts.display, flexShrink: 1 },
-  emptyText: { color: colors.muted, fontSize: 18, fontFamily: fonts.regular, lineHeight: 24 },
+  emptyText: { color: colors.muted, fontSize: 17, fontFamily: fonts.regular, lineHeight: 24 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
 });

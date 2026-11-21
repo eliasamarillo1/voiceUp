@@ -1,90 +1,178 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, View } from 'react-native';
+import { memo } from 'react';
+import Svg, { Rect } from 'react-native-svg';
 
 // Abi, la abejita de VoiceUp, en pixel art: cada carácter es un píxel.
-// Alas de cristal verde agua unidas con plomo dorado, como la vidriera, y lirios en las antenas.
-const ART = [
-  '......VV......VV......',
-  '.LLL...O......O...LLL.',
-  'LAAAL...O....O...LAAAL',
-  'LAALSL..OOOOOO..LSLAAL',
-  'LASLSLOOYYHHYYOOLSLSAL',
-  'LSSLAOYYYYHYYYYYOALSSL',
-  '.LSAAOYYYYYYYYYYOAASL.',
-  '..LLLOYEeYYYYEeYOLLL..',
-  '.....OYEEYYYYEEYO.....',
-  '.....OPYYYMMYYYPO.....',
-  '.....OBBBBBBBBBBO.....',
-  '.....OYYYYYYYYYYO.....',
-  '.....OBBBBBBBBBBO.....',
-  '......OyYYYYYYyO......',
-  '.......OOOOOOOO.......',
-  '.......OO....OO.......',
-];
+// Cuerpo redondo, alas de cristal verde agua con plomo dorado (como la vidriera) y lirios en las antenas.
+// Hay varios fotogramas para que aletee, parpadee y se ponga contenta.
+
+const FRAMES = {
+  idle: [
+    '.........V........V.........',
+    '........VvV......VvV........',
+    '.........G........G.........',
+    '.........O........O.........',
+    '..........O......O..........',
+    '....LLLLL.O......O.LLLLL....',
+    '...LAAAAAL.OOOOOO.LAAAAAL...',
+    '..LAAAAAAOOYYYYYYOOAAAAAAL..',
+    '.LAAAAALOYHHYYYYYYYOLAAAAAL.',
+    'LAAAALLOYHHHHYYYYYYYOLLAAAAL',
+    'LAALLSOYYHeEYYYYYeEYYOSLLAAL',
+    '.LSSSSOYYYEEYYYYYEEYYOSSSSL.',
+    '..LLLLOYYYEEYYYYYEEYYOLLLL..',
+    '.....OYYPPYYYMMYYYYPPYO.....',
+    '.....OYYYYYYYYYYYYYYYYO.....',
+    '......OYYYYYYYYYYYYYYO......',
+    '......OBBBBBBBBBBBBBBO......',
+    '......OBBBBBBBBBBBBBBO......',
+    '.......OYYYYYYYYyyyyO.......',
+    '........OBBBBBBBBBBO........',
+    '.........OBBBBBBBBO.........',
+    '..........OOOyyOOO..........',
+    '.............OO.............',
+    '..............O.............',
+  ],
+  flap: [
+    '.........V........V.........',
+    '........VvV......VvV........',
+    '.....LLLLG........GLLLL.....',
+    '...LLAAAAO........OAAAALL...',
+    '..LAAAAASLO......OLSAAAAAL..',
+    '..LAAAALSLO......OLSLAAAAL..',
+    '.LAAAALSSL.OOOOOO.LSSLAAAAL.',
+    '.LAAALSSLOOYYYYYYOOLSSLAAAL.',
+    '.LAALSSSOYHHYYYYYYYOSSSLAAL.',
+    '.LAALSLOYHHHHYYYYYYYOLSLAAL.',
+    '..LL.LOYYHeEYYYYYeEYYOL.LL..',
+    '......OYYYEEYYYYYEEYYO......',
+    '......OYYYEEYYYYYEEYYO......',
+    '.....OYYPPYYYMMYYYYPPYO.....',
+    '.....OYYYYYYYYYYYYYYYYO.....',
+    '......OYYYYYYYYYYYYYYO......',
+    '......OBBBBBBBBBBBBBBO......',
+    '......OBBBBBBBBBBBBBBO......',
+    '.......OYYYYYYYYyyyyO.......',
+    '........OBBBBBBBBBBO........',
+    '.........OBBBBBBBBO.........',
+    '..........OOOyyOOO..........',
+    '.............OO.............',
+    '..............O.............',
+  ],
+  blink: [
+    '.........V........V.........',
+    '........VvV......VvV........',
+    '.........G........G.........',
+    '.........O........O.........',
+    '..........O......O..........',
+    '....LLLLL.O......O.LLLLL....',
+    '...LAAAAAL.OOOOOO.LAAAAAL...',
+    '..LAAAAAAOOYYYYYYOOAAAAAAL..',
+    '.LAAAAALOYHHYYYYYYYOLAAAAAL.',
+    'LAAAALLOYHHHHYYYYYYYOLLAAAAL',
+    'LAALLSOYYHYYYYYYYYYYYOSLLAAL',
+    '.LSSSSOYYYEEYYYYYEEYYOSSSSL.',
+    '..LLLLOYYYYYYYYYYYYYYOLLLL..',
+    '.....OYYPPYYYMMYYYYPPYO.....',
+    '.....OYYYYYYYYYYYYYYYYO.....',
+    '......OYYYYYYYYYYYYYYO......',
+    '......OBBBBBBBBBBBBBBO......',
+    '......OBBBBBBBBBBBBBBO......',
+    '.......OYYYYYYYYyyyyO.......',
+    '........OBBBBBBBBBBO........',
+    '.........OBBBBBBBBO.........',
+    '..........OOOyyOOO..........',
+    '.............OO.............',
+    '..............O.............',
+  ],
+  happy: [
+    '.........V........V.........',
+    '........VvV......VvV........',
+    '.....LLLLG........GLLLL.....',
+    '...LLAAAAO........OAAAALL...',
+    '..LAAAAASLO......OLSAAAAAL..',
+    '..LAAAALSLO......OLSLAAAAL..',
+    '.LAAAALSSL.OOOOOO.LSSLAAAAL.',
+    '.LAAALSSLOOYYYYYYOOLSSLAAAL.',
+    '.LAALSSSOYHHYYYYYYYOSSSLAAL.',
+    '.LAALSLOYHHHHYYYYYYYOLSLAAL.',
+    '..LL.LOYYHeEYYYYYeEYYOL.LL..',
+    '......OYYYEEYYYYYEEYYO......',
+    '......OYYYEEYYYYYEEYYO......',
+    '.....OYYPPYYYMMYYYYPPYO.....',
+    '.....OYYYYYYYTTYYYYYYYO.....',
+    '......OYYYYYYYYYYYYYYO......',
+    '......OBBBBBBBBBBBBBBO......',
+    '......OBBBBBBBBBBBBBBO......',
+    '.......OYYYYYYYYyyyyO.......',
+    '........OBBBBBBBBBBO........',
+    '.........OBBBBBBBBO.........',
+    '..........OOOyyOOO..........',
+    '.............OO.............',
+    '..............O.............',
+  ],
+} as const;
+
+export type BeeFrame = keyof typeof FRAMES;
 
 const PALETTE: Record<string, string> = {
-  O: '#2C2A44',
-  B: '#2C2A44',
-  E: '#2C2A44',
-  Y: '#E9B84E',
-  y: '#D49634',
-  H: '#FBE3A6',
-  e: '#FFFFFF',
-  P: '#E39AA8',
-  M: '#7A3A3A',
-  A: '#CBE7DF',
-  S: '#79B9AD',
+  A: '#D6EFE9',
+  B: '#3A3552',
+  E: '#1E1C30',
+  G: '#5F9C86',
+  H: '#FFEDB0',
   L: '#B8975A',
-  V: '#6E78CF',
+  M: '#8A3B45',
+  O: '#2C2A44',
+  P: '#F09AAE',
+  S: '#8CC7BC',
+  T: '#F07C95',
+  V: '#7C86D6',
+  Y: '#F4C553',
+  e: '#FFFFFF',
+  v: '#3B43A0',
+  y: '#DC9A33',
 };
 
-export function PixelBee({ size = 3, still = false }: { size?: number; still?: boolean }) {
-  const bob = useRef(new Animated.Value(0)).current;
+export const BEE_COLS = FRAMES.idle[0].length;
+export const BEE_ROWS = FRAMES.idle.length;
 
-  useEffect(() => {
-    if (still) return;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(bob, {
-          toValue: 1,
-          duration: 900,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: false,
-        }),
-        Animated.timing(bob, {
-          toValue: 0,
-          duration: 900,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: false,
-        }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [bob, still]);
+// Une los píxeles seguidos del mismo color en un solo rectángulo para dibujar menos piezas.
+const RUNS = Object.fromEntries(
+  Object.entries(FRAMES).map(([name, rows]) => {
+    const runs: { x: number; y: number; w: number; c: string }[] = [];
+    rows.forEach((row, y) => {
+      let x = 0;
+      while (x < row.length) {
+        const c = row[x];
+        let w = 1;
+        while (x + w < row.length && row[x + w] === c) w++;
+        if (c !== '.') runs.push({ x, y, w, c: PALETTE[c] });
+        x += w;
+      }
+    });
+    return [name, runs];
+  }),
+) as Record<BeeFrame, { x: number; y: number; w: number; c: string }[]>;
 
-  const translateY = bob.interpolate({ inputRange: [0, 1], outputRange: [0, -size * 1.5] });
-
+/** Dibuja a Abi. `size` es el tamaño de cada píxel. */
+export const PixelBee = memo(function PixelBee({
+  size = 3,
+  frame = 'idle',
+}: {
+  size?: number;
+  frame?: BeeFrame;
+}) {
   return (
-    <Animated.View
+    <Svg
+      width={BEE_COLS * size}
+      height={BEE_ROWS * size}
+      viewBox={`0 0 ${BEE_COLS} ${BEE_ROWS}`}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={{ transform: [{ translateY }] }}
     >
-      {ART.map((row, y) => (
-        <View key={y} style={{ flexDirection: 'row' }}>
-          {row.split('').map((c, x) => (
-            <View
-              key={x}
-              style={{
-                width: size,
-                height: size,
-                backgroundColor: PALETTE[c] ?? 'transparent',
-              }}
-            />
-          ))}
-        </View>
+      {RUNS[frame].map((r, i) => (
+        <Rect key={i} x={r.x} y={r.y} width={r.w + 0.02} height={1.02} fill={r.c} />
       ))}
-    </Animated.View>
+    </Svg>
   );
-}
+});

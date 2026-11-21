@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   block: { justifyContent: 'center', paddingHorizontal: 6 },
-  blockText: { color: colors.text, fontSize: 15, fontFamily: fonts.bold },
+  blockText: { color: colors.text, fontSize: 14, fontFamily: fonts.bold },
   playhead: {
     position: 'absolute',
     top: 0,

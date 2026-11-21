@@ -63,13 +63,13 @@ export const sectionInk: Record<string, string> = {
   final: '#5E52A0',
 };
 
-/** Tipografías: Federo (Art Nouveau) para títulos y Alegreya Sans (humanista, caligráfica) para el texto. */
+/** Tipografía: Inter, una letra normal y muy legible, en varios grosores. */
 export const fonts = {
-  display: 'Federo_400Regular',
-  regular: 'AlegreyaSans_400Regular',
-  medium: 'AlegreyaSans_500Medium',
-  bold: 'AlegreyaSans_700Bold',
-  heavy: 'AlegreyaSans_800ExtraBold',
+  display: 'Inter_700Bold',
+  regular: 'Inter_400Regular',
+  medium: 'Inter_500Medium',
+  bold: 'Inter_600SemiBold',
+  heavy: 'Inter_700Bold',
 };
 
 export const radius = { sm: 6, md: 12, lg: 18, pill: 999, arch: 120 };

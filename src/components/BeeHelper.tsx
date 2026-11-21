@@ -1,7 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  AccessibilityInfo,
+  Animated,
+  Easing,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { usePathname } from 'expo-router';
-import { PixelBee } from './PixelBee';
+import { BEE_COLS, BEE_ROWS, PixelBee, type BeeFrame } from './PixelBee';
 import { fonts, colors, radius } from '../theme';
 
 type Page = 'inicio' | 'cancion' | 'recurso' | 'recursos' | 'calentamiento';
@@ -9,7 +19,7 @@ type Page = 'inicio' | 'cancion' | 'recurso' | 'recursos' | 'calentamiento';
 // Pequeñas aclaraciones de Abi para cada pantalla.
 const TIPS: Record<Page, string[]> = {
   inicio: [
-    '¡Hola! Soy Abi, tu ayudante. Busca una canción por su título, su artista o un trozo de la letra.',
+    '¡Hola! Soy Abi. Vuelo por aquí: tócame cuando quieras un consejo. Busca una canción por su título, su artista o un trozo de la letra.',
     'Las etiquetas de colores de cada canción son sus recursos vocales. Cada recurso tiene siempre el mismo color en toda la app.',
     'Si una canción sale como «todavía no está analizada», es que aún no tenemos su estudio. En la versión final se analizará sola; mientras, puedes escucharla en Spotify o YouTube.',
     'Los tres accesos de arriba te llevan a las canciones, a los recursos vocales o al calentamiento.',
@@ -60,100 +70,328 @@ function seenBefore(page: Page) {
   }
 }
 
-/** Abi, la abejita ayudante: flota en una esquina y da pequeñas aclaraciones sobre la pantalla. */
+const PX = 3; // tamaño de cada píxel de Abi
+const BEE_W = BEE_COLS * PX;
+const BEE_H = BEE_ROWS * PX;
+const rand = (a: number, b: number) => a + Math.random() * (b - a);
+
+/**
+ * Abi, la abejita mascota: vuela libre por la pantalla. Si la tocas, da un saltito, suelta
+ * corazones y te cuenta un consejo sobre la pantalla en la que estás.
+ */
 export function BeeHelper() {
   const page = pageFor(usePathname());
   const tips = TIPS[page];
-  const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
+  const { width, height } = useWindowDimensions();
+
+  const pos = useRef(
+    new Animated.ValueXY({ x: width - BEE_W - 24, y: height - BEE_H - 130 }),
+  ).current;
+  const bob = useRef(new Animated.Value(0)).current;
+  const tilt = useRef(new Animated.Value(0)).current;
+  const jump = useRef(new Animated.Value(0)).current;
+  const hearts = useRef(new Animated.Value(0)).current;
+  const current = useRef({ x: width - BEE_W - 24, y: height - BEE_H - 130 });
+
+  const [frame, setFrame] = useState<BeeFrame>('idle');
+  const [flying, setFlying] = useState(false);
+  const [happy, setHappy] = useState(false);
+  const [tip, setTip] = useState<number | null>(null);
+  const [beePos, setBeePos] = useState(current.current);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const nextTip = useRef(0);
 
   useEffect(() => {
-    setIndex(0);
-    // La primera vez que visitas una pantalla, Abi saluda sola. Después, solo si la tocas.
-    setOpen(!seenBefore(page));
+    AccessibilityInfo.isReduceMotionEnabled?.()
+      .then(setReduceMotion)
+      .catch(() => {});
+  }, []);
+
+  // Límites por donde puede volar (encima de la barra de reproducción en la canción).
+  const bottomSpace = page === 'cancion' ? 110 : 24;
+  const bounds = {
+    minX: 8,
+    maxX: Math.max(8, width - BEE_W - 8),
+    minY: 70,
+    maxY: Math.max(70, height - BEE_H - bottomSpace),
+  };
+
+  // Aleteo y parpadeo.
+  useEffect(() => {
+    let tick = 0;
+    const id = setInterval(
+      () => {
+        tick++;
+        if (happy) return setFrame(tick % 2 ? 'happy' : 'flap');
+        if (!flying && tick % 18 === 0) return setFrame('blink');
+        setFrame(tick % 2 ? 'flap' : 'idle');
+      },
+      flying || happy ? 110 : 240,
+    );
+    return () => clearInterval(id);
+  }, [flying, happy]);
+
+  // Flota arriba y abajo suavemente.
+  useEffect(() => {
+    if (reduceMotion) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bob, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: false,
+        }),
+        Animated.timing(bob, {
+          toValue: 0,
+          duration: 800,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: false,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [bob, reduceMotion]);
+
+  const flyTo = useCallback(
+    (x: number, y: number, done?: () => void) => {
+      const from = current.current;
+      const dist = Math.hypot(x - from.x, y - from.y);
+      current.current = { x, y };
+      setFlying(true);
+      Animated.timing(tilt, {
+        toValue: Math.sign(x - from.x),
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+      Animated.timing(pos, {
+        toValue: { x, y },
+        duration: Math.max(900, (dist / 110) * 1000),
+        easing: Easing.inOut(Easing.sin),
+        useNativeDriver: false,
+      }).start(({ finished }) => {
+        setFlying(false);
+        setBeePos({ x, y });
+        Animated.timing(tilt, { toValue: 0, duration: 300, useNativeDriver: false }).start();
+        if (finished) done?.();
+      });
+    },
+    [pos, tilt],
+  );
+
+  // Paseo libre por la pantalla mientras no está hablando.
+  useEffect(() => {
+    if (reduceMotion || tip !== null) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const wander = () => {
+      flyTo(rand(bounds.minX, bounds.maxX), rand(bounds.minY, bounds.maxY), () => {
+        timer = setTimeout(wander, rand(2500, 5500));
+      });
+    };
+    timer = setTimeout(wander, rand(1500, 3000));
+    return () => {
+      clearTimeout(timer);
+      pos.stopAnimation((v) => {
+        current.current = v;
+        setBeePos(v);
+      });
+    };
+  }, [reduceMotion, tip, flyTo, pos, bounds.minX, bounds.maxX, bounds.minY, bounds.maxY]);
+
+  // Si cambia el tamaño de la ventana, que no se quede fuera.
+  useEffect(() => {
+    const { x, y } = current.current;
+    if (x > bounds.maxX || y > bounds.maxY) {
+      const nx = Math.min(x, bounds.maxX);
+      const ny = Math.min(y, bounds.maxY);
+      current.current = { x: nx, y: ny };
+      pos.setValue({ x: nx, y: ny });
+      setBeePos({ x: nx, y: ny });
+    }
+  }, [bounds.maxX, bounds.maxY, pos]);
+
+  // La primera vez que visitas una pantalla, Abi se acerca y te saluda.
+  useEffect(() => {
+    nextTip.current = 0;
+    setTip(null);
+    if (!seenBefore(page)) {
+      const t = setTimeout(() => {
+        nextTip.current = 1;
+        setTip(0);
+      }, 900);
+      return () => clearTimeout(t);
+    }
   }, [page]);
 
-  // En la canción hay una barra de reproducción abajo: Abi se coloca encima.
-  const bottom = page === 'cancion' ? 92 : 20;
+  // El consejo se va solo al cabo de un rato.
+  useEffect(() => {
+    if (tip === null) return;
+    const t = setTimeout(() => setTip(null), 9000);
+    return () => clearTimeout(t);
+  }, [tip]);
+
+  const onTouch = () => {
+    pos.stopAnimation((v) => {
+      current.current = v;
+      setBeePos(v);
+    });
+    setFlying(false);
+    setHappy(true);
+    jump.setValue(0);
+    hearts.setValue(0);
+    Animated.parallel([
+      Animated.sequence([
+        Animated.timing(jump, {
+          toValue: 1,
+          duration: 220,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: false,
+        }),
+        Animated.timing(jump, {
+          toValue: 2,
+          duration: 420,
+          easing: Easing.bounce,
+          useNativeDriver: false,
+        }),
+      ]),
+      Animated.timing(hearts, {
+        toValue: 1,
+        duration: 1100,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: false,
+      }),
+    ]).start(() => setHappy(false));
+    const i = nextTip.current % tips.length;
+    nextTip.current = i + 1;
+    setTip(i);
+  };
+
+  const translateY = Animated.add(
+    bob.interpolate({ inputRange: [0, 1], outputRange: [0, -6] }),
+    jump.interpolate({ inputRange: [0, 1, 2], outputRange: [0, -22, 0] }),
+  );
+  const rotate = Animated.add(
+    tilt.interpolate({ inputRange: [-1, 1], outputRange: [-10, 10] }),
+    jump.interpolate({ inputRange: [0, 1, 2], outputRange: [0, 180, 360] }),
+  ).interpolate({ inputRange: [-360, 360], outputRange: ['-360deg', '360deg'] });
+
+  // El consejo aparece al lado de Abi, hacia el centro de la pantalla.
+  const onRight = beePos.x > width / 2;
+  const cardW = Math.min(280, width - 32);
+  const cardLeft = Math.max(
+    16,
+    Math.min(width - cardW - 16, onRight ? beePos.x - cardW - 8 : beePos.x + BEE_W + 8),
+  );
+  const cardTop = Math.max(16, Math.min(height - bottomSpace - 190, beePos.y - 20));
 
   return (
-    <View pointerEvents="box-none" style={[styles.wrap, { bottom }]}>
-      {open && (
-        <View style={styles.bubble} accessibilityLiveRegion="polite">
+    <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+      {tip !== null && (
+        <View
+          style={[styles.card, { left: cardLeft, top: cardTop, width: cardW }]}
+          accessibilityLiveRegion="polite"
+        >
           <Text style={styles.name}>Abi</Text>
-          <Text style={styles.tip}>{tips[index]}</Text>
+          <Text style={styles.tip}>{tips[tip]}</Text>
           <View style={styles.actions}>
             <Text style={styles.count}>
-              {index + 1}/{tips.length}
+              {tip + 1}/{tips.length}
             </Text>
             <View style={{ flexDirection: 'row', gap: 6 }}>
               <Pressable
-                onPress={() => setOpen(false)}
+                onPress={() => setTip(null)}
                 accessibilityRole="button"
                 style={styles.btnGhost}
               >
                 <Text style={styles.btnGhostText}>Cerrar</Text>
               </Pressable>
               <Pressable
-                onPress={() => (index < tips.length - 1 ? setIndex(index + 1) : setOpen(false))}
+                onPress={() => {
+                  const n = (tip + 1) % tips.length;
+                  nextTip.current = n + 1;
+                  setTip(n);
+                }}
                 accessibilityRole="button"
                 style={styles.btn}
               >
-                <Text style={styles.btnText}>
-                  {index < tips.length - 1 ? 'Otro consejo' : '¡Entendido!'}
-                </Text>
+                <Text style={styles.btnText}>Otro consejo</Text>
               </Pressable>
             </View>
           </View>
-          <View style={styles.tail} />
         </View>
       )}
-      <Pressable
-        onPress={() => {
-          if (!open) setIndex(0);
-          setOpen(!open);
-        }}
-        accessibilityRole="button"
-        accessibilityLabel={open ? 'Cerrar la ayuda de Abi' : 'Abrir la ayuda de Abi, la abejita'}
-        style={({ pressed }) => [styles.beeBtn, pressed && { transform: [{ scale: 0.94 }] }]}
+      <Animated.View
+        pointerEvents="box-none"
+        style={[
+          styles.bee,
+          { transform: [...pos.getTranslateTransform(), { translateY }, { rotate }] },
+        ]}
       >
-        <PixelBee size={3} />
-      </Pressable>
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.hearts,
+            {
+              opacity: hearts.interpolate({
+                inputRange: [0, 0.15, 0.8, 1],
+                outputRange: [0, 1, 1, 0],
+              }),
+              transform: [
+                { translateY: hearts.interpolate({ inputRange: [0, 1], outputRange: [0, -36] }) },
+              ],
+            },
+          ]}
+        >
+          <Text style={[styles.heart, { marginTop: 8 }]}>♥</Text>
+          <Text style={styles.heart}>♥</Text>
+          <Text style={[styles.heart, { marginTop: 12 }]}>♥</Text>
+        </Animated.View>
+        <Pressable
+          onPress={onTouch}
+          accessibilityRole="button"
+          accessibilityLabel="Abi, la abejita. Tócala para que te dé un consejo"
+          hitSlop={8}
+        >
+          <PixelBee size={PX} frame={frame} />
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
+  bee: { position: 'absolute', left: 0, top: 0, zIndex: 50 },
+  hearts: {
     position: 'absolute',
-    right: 16,
-    alignItems: 'flex-end',
-    maxWidth: 320,
-    zIndex: 50,
+    top: -14,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
   },
-  bubble: {
+  heart: { color: '#E86A92', fontSize: 16, fontFamily: fonts.bold },
+  card: {
+    position: 'absolute',
+    zIndex: 51,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1.5,
     borderColor: colors.gold,
     padding: 14,
-    outlineWidth: 3,
-    outlineStyle: 'solid',
-    outlineColor: colors.frame,
-    outlineOffset: 3,
-    marginBottom: 10,
-    shadowColor: '#1D1828',
-    shadowOpacity: 0.12,
+    shadowColor: '#2C2A44',
+    shadowOpacity: 0.14,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 6 },
     elevation: 4,
   },
-  name: { color: colors.frameDark, fontSize: 14, fontFamily: fonts.heavy, letterSpacing: 0.5 },
+  name: { color: colors.frameDark, fontSize: 13, fontFamily: fonts.heavy },
   tip: {
     color: colors.text,
     fontSize: 15,
     fontFamily: fonts.regular,
-    lineHeight: 20,
+    lineHeight: 21,
     marginTop: 4,
   },
   actions: {
@@ -163,36 +401,14 @@ const styles = StyleSheet.create({
     marginTop: 12,
     gap: 8,
   },
-  count: { color: colors.faint, fontSize: 14, fontFamily: fonts.bold },
+  count: { color: colors.faint, fontSize: 13, fontFamily: fonts.bold },
   btn: {
     backgroundColor: colors.frame,
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: radius.pill,
   },
-  btnText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.heavy },
+  btnText: { color: '#FFFFFF', fontSize: 14, fontFamily: fonts.bold },
   btnGhost: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: radius.pill },
-  btnGhostText: { color: colors.muted, fontSize: 15, fontFamily: fonts.bold },
-  tail: {
-    position: 'absolute',
-    right: 24,
-    bottom: -7,
-    width: 12,
-    height: 12,
-    backgroundColor: colors.surface,
-    borderRightWidth: 1.5,
-    borderBottomWidth: 1.5,
-    borderColor: colors.gold,
-    transform: [{ rotate: '45deg' }],
-  },
-  beeBtn: {
-    width: 84,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.surface,
-    borderWidth: 1.5,
-    borderColor: colors.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  btnGhostText: { color: colors.muted, fontSize: 14, fontFamily: fonts.bold },
 });

@@ -27,7 +27,7 @@ export default function TechniquesLibrary() {
 const styles = StyleSheet.create({
   back: {
     color: colors.muted,
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: fonts.bold,
     paddingTop: 24,
     paddingBottom: 16,
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 38, fontFamily: fonts.display },
   sub: {
     color: colors.muted,
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: fonts.regular,
     lineHeight: 23,
     marginTop: 8,

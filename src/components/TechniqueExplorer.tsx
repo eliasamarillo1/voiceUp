@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   tileBar: { width: 22, height: 4, borderRadius: 2, marginBottom: 10 },
-  tileName: { color: colors.text, fontSize: 16, fontFamily: fonts.heavy },
-  tileMeta: { color: colors.faint, fontSize: 14, fontFamily: fonts.regular, marginTop: 2 },
+  tileName: { color: colors.text, fontSize: 15, fontFamily: fonts.heavy },
+  tileMeta: { color: colors.faint, fontSize: 13, fontFamily: fonts.regular, marginTop: 2 },
   panel: {
     flexGrow: 1.3,
     flexBasis: 320,
@@ -181,11 +181,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   panelHead: { padding: 18 },
-  panelKicker: { fontSize: 14, fontFamily: fonts.heavy, letterSpacing: 0.8 },
+  panelKicker: { fontSize: 13, fontFamily: fonts.heavy, letterSpacing: 0.8 },
   panelName: { color: colors.text, fontSize: 28, fontFamily: fonts.display, marginTop: 4 },
   panelSummary: {
     color: colors.muted,
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: fonts.regular,
     lineHeight: 22,
     marginTop: 4,
@@ -193,12 +193,12 @@ const styles = StyleSheet.create({
   panelBody: { padding: 18, paddingTop: 6 },
   label: {
     color: colors.text,
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: fonts.heavy,
     marginTop: 14,
     marginBottom: 6,
   },
-  text: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, lineHeight: 21 },
+  text: { color: colors.muted, fontSize: 14, fontFamily: fonts.regular, lineHeight: 21 },
   step: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', marginBottom: 8 },
   stepNum: {
     width: 22,
@@ -207,10 +207,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepNumText: { color: '#FFFFFF', fontSize: 14, fontFamily: fonts.heavy },
+  stepNumText: { color: '#FFFFFF', fontSize: 13, fontFamily: fonts.heavy },
   stepText: {
     color: colors.muted,
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: fonts.regular,
     lineHeight: 20,
     flex: 1,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   stat: {
     color: colors.muted,
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: fonts.bold,
     backgroundColor: colors.surfaceAlt,
     paddingHorizontal: 10,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 16 },
   primary: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: radius.pill },
-  primaryText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.heavy },
+  primaryText: { color: '#FFFFFF', fontSize: 14, fontFamily: fonts.heavy },
   secondary: {
     paddingHorizontal: 18,
     paddingVertical: 12,
@@ -236,5 +236,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  secondaryText: { color: colors.text, fontSize: 15, fontFamily: fonts.bold },
+  secondaryText: { color: colors.text, fontSize: 14, fontFamily: fonts.bold },
 });
