@@ -77,9 +77,6 @@ export interface Tutorial {
   title: string;
   channel?: string;
   language: 'es' | 'en';
-  /** Datos de YouTube cuando el vídeo se eligió automáticamente. */
-  views?: number;
-  durationSec?: number;
 }
 
 export interface Exercise {
