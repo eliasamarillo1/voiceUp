@@ -71,6 +71,8 @@ function seenBefore(page: Page) {
 }
 
 const PX = 3; // tamaño de cada píxel de Abi
+const CONTENT_W = 920; // ancho máximo de la columna de contenido (ver Page en ui.tsx)
+const PEEK = 0.6; // en móvil, parte de Abi que se asoma desde el borde
 const BEE_W = BEE_COLS * PX;
 const BEE_H = BEE_ROWS * PX;
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
@@ -116,6 +118,18 @@ export function BeeHelper() {
     minY: 70,
     maxY: Math.max(70, height - BEE_H - bottomSpace),
   };
+
+  // Abi vuela solo por los laterales, nunca por encima de los textos. El contenido de cada
+  // pantalla ocupa una columna central de hasta CONTENT_W px; Abi se queda en el margen de su lado.
+  // Si no hay margen (móvil), se asoma desde el borde derecho y solo sube y baja.
+  const gutter = (width - Math.min(CONTENT_W, width)) / 2 + 8;
+  const wide = gutter >= BEE_W + 8;
+  const onRightSide = current.current.x + BEE_W / 2 >= width / 2;
+  const lane = !wide
+    ? { minX: width - BEE_W * PEEK, maxX: width - BEE_W * PEEK }
+    : onRightSide
+      ? { minX: width - gutter, maxX: width - BEE_W - 8 }
+      : { minX: 8, maxX: gutter - BEE_W };
 
   // Aleteo y parpadeo.
   useEffect(() => {
@@ -187,7 +201,7 @@ export function BeeHelper() {
     if (reduceMotion || tip !== null) return;
     let timer: ReturnType<typeof setTimeout>;
     const wander = () => {
-      flyTo(rand(bounds.minX, bounds.maxX), rand(bounds.minY, bounds.maxY), () => {
+      flyTo(rand(lane.minX, lane.maxX), rand(bounds.minY, bounds.maxY), () => {
         timer = setTimeout(wander, rand(2500, 5500));
       });
     };
@@ -199,19 +213,19 @@ export function BeeHelper() {
         setBeePos(v);
       });
     };
-  }, [reduceMotion, tip, flyTo, pos, bounds.minX, bounds.maxX, bounds.minY, bounds.maxY]);
+  }, [reduceMotion, tip, flyTo, pos, lane.minX, lane.maxX, bounds.minY, bounds.maxY]);
 
-  // Si cambia el tamaño de la ventana, que no se quede fuera.
+  // Si cambia el tamaño de la ventana, que vuelva a su lateral y no se quede fuera.
   useEffect(() => {
     const { x, y } = current.current;
-    if (x > bounds.maxX || y > bounds.maxY) {
-      const nx = Math.min(x, bounds.maxX);
+    if (x < lane.minX || x > lane.maxX || y > bounds.maxY) {
+      const nx = Math.min(Math.max(x, lane.minX), lane.maxX);
       const ny = Math.min(y, bounds.maxY);
       current.current = { x: nx, y: ny };
       pos.setValue({ x: nx, y: ny });
       setBeePos({ x: nx, y: ny });
     }
-  }, [bounds.maxX, bounds.maxY, pos]);
+  }, [lane.minX, lane.maxX, bounds.maxY, pos]);
 
   // La primera vez que visitas una pantalla, Abi se acerca y te saluda.
   useEffect(() => {
