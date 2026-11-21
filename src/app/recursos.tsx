@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { techniques } from '../data/techniques';
 import { Page } from '../components/ui';
 import { TechniqueExplorer } from '../components/TechniqueExplorer';
-import { colors } from '../theme';
+import { fonts, colors } from '../theme';
 
 // Biblioteca de recursos vocales: explorar, aprender qué es cada uno y llegar a sus ejercicios.
 export default function TechniquesLibrary() {
@@ -25,7 +25,20 @@ export default function TechniquesLibrary() {
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.muted, fontSize: 15, fontWeight: '600', paddingTop: 24, paddingBottom: 16 },
-  title: { color: colors.text, fontSize: 38, fontWeight: '900', letterSpacing: -1 },
-  sub: { color: colors.muted, fontSize: 16, lineHeight: 23, marginTop: 8, marginBottom: 24 },
+  back: {
+    color: colors.muted,
+    fontSize: 16,
+    fontFamily: fonts.bold,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  title: { color: colors.text, fontSize: 38, fontFamily: fonts.display },
+  sub: {
+    color: colors.muted,
+    fontSize: 17,
+    fontFamily: fonts.regular,
+    lineHeight: 23,
+    marginTop: 8,
+    marginBottom: 24,
+  },
 });

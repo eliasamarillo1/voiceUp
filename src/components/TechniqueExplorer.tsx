@@ -6,7 +6,7 @@ import { categories, techniques } from '../data/techniques';
 import { songs } from '../data/songs';
 import type { TechniqueCategory } from '../data/types';
 import { Pill } from './ui';
-import { colors, radius } from '../theme';
+import { fonts, colors, radius } from '../theme';
 
 const songsWith = (id: string) =>
   songs.filter((s) => s.occurrences.some((o) => o.techniqueId === id)).length;
@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   tileBar: { width: 22, height: 4, borderRadius: 2, marginBottom: 10 },
-  tileName: { color: colors.text, fontSize: 15, fontWeight: '800' },
-  tileMeta: { color: colors.faint, fontSize: 12, marginTop: 2 },
+  tileName: { color: colors.text, fontSize: 16, fontFamily: fonts.heavy },
+  tileMeta: { color: colors.faint, fontSize: 14, fontFamily: fonts.regular, marginTop: 2 },
   panel: {
     flexGrow: 1.3,
     flexBasis: 320,
@@ -181,12 +181,24 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   panelHead: { padding: 18 },
-  panelKicker: { fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 },
-  panelName: { color: colors.text, fontSize: 28, fontWeight: '900', marginTop: 4 },
-  panelSummary: { color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: 4 },
+  panelKicker: { fontSize: 14, fontFamily: fonts.heavy, letterSpacing: 0.8 },
+  panelName: { color: colors.text, fontSize: 28, fontFamily: fonts.display, marginTop: 4 },
+  panelSummary: {
+    color: colors.muted,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    lineHeight: 22,
+    marginTop: 4,
+  },
   panelBody: { padding: 18, paddingTop: 6 },
-  label: { color: colors.text, fontSize: 14, fontWeight: '800', marginTop: 14, marginBottom: 6 },
-  text: { color: colors.muted, fontSize: 14, lineHeight: 21 },
+  label: {
+    color: colors.text,
+    fontSize: 15,
+    fontFamily: fonts.heavy,
+    marginTop: 14,
+    marginBottom: 6,
+  },
+  text: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, lineHeight: 21 },
   step: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', marginBottom: 8 },
   stepNum: {
     width: 22,
@@ -195,13 +207,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepNumText: { color: '#FFFFFF', fontSize: 12, fontWeight: '900' },
-  stepText: { color: colors.muted, fontSize: 14, lineHeight: 20, flex: 1, paddingTop: 1 },
+  stepNumText: { color: '#FFFFFF', fontSize: 14, fontFamily: fonts.heavy },
+  stepText: {
+    color: colors.muted,
+    fontSize: 15,
+    fontFamily: fonts.regular,
+    lineHeight: 20,
+    flex: 1,
+    paddingTop: 1,
+  },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   stat: {
     color: colors.muted,
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 14,
+    fontFamily: fonts.bold,
     backgroundColor: colors.surfaceAlt,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -209,7 +228,7 @@ const styles = StyleSheet.create({
   },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 16 },
   primary: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: radius.pill },
-  primaryText: { color: '#FFFFFF', fontWeight: '800', fontSize: 14 },
+  primaryText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.heavy },
   secondary: {
     paddingHorizontal: 18,
     paddingVertical: 12,
@@ -217,5 +236,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  secondaryText: { color: colors.text, fontWeight: '700', fontSize: 14 },
+  secondaryText: { color: colors.text, fontSize: 15, fontFamily: fonts.bold },
 });

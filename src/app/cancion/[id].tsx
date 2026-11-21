@@ -7,10 +7,11 @@ import type { Occurrence, Song } from '../../data/types';
 import { usePlaybackClock } from '../../lib/usePlaybackClock';
 import { tokenizeLine, transposeKey, transposeNote } from '../../lib/music';
 import { SongMap } from '../../components/SongMap';
+import { Frame } from '../../components/Nouveau';
 import { SheetMusic } from '../../components/SheetMusic';
 import { YouTubeEmbed } from '../../components/YouTubeEmbed';
 import { Body, Card, LinkButton, Page, Pill } from '../../components/ui';
-import { colors, formatTime, radius, sectionColors, sectionInk } from '../../theme';
+import { fonts, colors, formatTime, radius, sectionColors, sectionInk } from '../../theme';
 
 const TABS = [
   { id: 'letra', label: 'Letra' },
@@ -102,7 +103,8 @@ function SongFolder({
             </View>
           </View>
 
-          <View style={{ marginTop: 24 }}>
+          <Frame style={{ marginTop: 24 }}>
+            <Text style={styles.mapTitle}>Mapa de la canción</Text>
             <SongMap
               song={song}
               time={clock.time}
@@ -112,7 +114,7 @@ function SongFolder({
             <Text style={styles.mapHint}>
               Toca el mapa para saltar a una parte. Los puntos de colores son los recursos vocales.
             </Text>
-          </View>
+          </Frame>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 20 }}>
             <View style={styles.tabs}>
@@ -479,16 +481,22 @@ function ListenTab({ song }: { song: Song }) {
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.muted, fontSize: 15, fontWeight: '600', paddingTop: 24, paddingBottom: 16 },
+  mapTitle: { color: colors.frameDark, fontSize: 22, fontFamily: fonts.display, marginBottom: 8 },
+  back: {
+    color: colors.muted,
+    fontSize: 16,
+    fontFamily: fonts.bold,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
   kicker: {
     color: colors.accent,
-    fontSize: 13,
-    fontWeight: '800',
-    textTransform: 'uppercase',
+    fontSize: 15,
+    fontFamily: fonts.heavy,
     letterSpacing: 1,
   },
-  title: { color: colors.text, fontSize: 38, fontWeight: '900', letterSpacing: -1, marginTop: 6 },
-  artist: { color: colors.muted, fontSize: 17, marginTop: 4 },
+  title: { color: colors.text, fontSize: 38, fontFamily: fonts.display, marginTop: 6 },
+  artist: { color: colors.muted, fontSize: 18, fontFamily: fonts.regular, marginTop: 4 },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 20 },
   stat: {
     backgroundColor: colors.surface,
@@ -498,8 +506,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  statLabel: { color: colors.faint, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
-  statValue: { color: colors.text, fontSize: 15, fontWeight: '700', marginTop: 2 },
+  statLabel: { color: colors.faint, fontSize: 13, fontFamily: fonts.bold },
+  statValue: { color: colors.text, fontSize: 16, fontFamily: fonts.bold, marginTop: 2 },
   listen: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -513,9 +521,15 @@ const styles = StyleSheet.create({
   },
   listenVideo: { flexGrow: 1, flexBasis: 320, maxWidth: 520 },
   listenText: { flexGrow: 1, flexBasis: 220, justifyContent: 'center', padding: 8 },
-  listenTitle: { color: colors.text, fontSize: 20, fontWeight: '900' },
-  listenSub: { color: colors.muted, fontSize: 14, marginTop: 4 },
-  listenHint: { color: colors.faint, fontSize: 13, lineHeight: 19, marginTop: 10 },
+  listenTitle: { color: colors.text, fontSize: 20, fontFamily: fonts.display },
+  listenSub: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, marginTop: 4 },
+  listenHint: {
+    color: colors.faint,
+    fontSize: 15,
+    fontFamily: fonts.regular,
+    lineHeight: 19,
+    marginTop: 10,
+  },
   warmBtn: {
     alignSelf: 'flex-start',
     marginTop: 14,
@@ -524,26 +538,37 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: radius.pill,
   },
-  warmBtnText: { color: '#FFFFFF', fontWeight: '800', fontSize: 14 },
-  mapHint: { color: colors.faint, fontSize: 12, marginTop: 8 },
+  warmBtnText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.heavy },
+  mapHint: { color: colors.faint, fontSize: 14, fontFamily: fonts.regular, marginTop: 8 },
   tabs: { flexDirection: 'row', gap: 8 },
   lyricSection: {
-    fontSize: 12,
-    fontWeight: '800',
-    textTransform: 'uppercase',
+    fontSize: 14,
+    fontFamily: fonts.heavy,
     letterSpacing: 1,
     marginTop: 18,
     marginBottom: 4,
   },
   lyricLine: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.md },
   lyricActive: { backgroundColor: colors.surfaceAlt },
-  lyricText: { color: colors.muted, fontSize: 22, lineHeight: 32, fontWeight: '700' },
+  lyricText: { color: colors.muted, fontSize: 22, fontFamily: fonts.display, lineHeight: 32 },
   markWord: { textDecorationLine: 'underline', textDecorationStyle: 'solid', borderRadius: 4 },
-  footNote: { color: colors.faint, fontSize: 13, lineHeight: 19, marginTop: 12 },
+  footNote: {
+    color: colors.faint,
+    fontSize: 15,
+    fontFamily: fonts.regular,
+    lineHeight: 19,
+    marginTop: 12,
+  },
   techHead: { flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
-  techName: { fontSize: 20, fontWeight: '900' },
-  techSummary: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 2 },
-  techCta: { color: colors.text, fontWeight: '700', fontSize: 14 },
+  techName: { fontSize: 20, fontFamily: fonts.display },
+  techSummary: {
+    color: colors.muted,
+    fontSize: 15,
+    fontFamily: fonts.regular,
+    lineHeight: 20,
+    marginTop: 2,
+  },
+  techCta: { color: colors.text, fontSize: 15, fontFamily: fonts.bold },
   moment: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -552,10 +577,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     padding: 10,
   },
-  momentTime: { color: colors.text, fontWeight: '800', fontSize: 14, minWidth: 54 },
-  momentWord: { color: colors.text, fontWeight: '700', fontSize: 15 },
-  momentNote: { color: colors.muted, fontSize: 13, marginTop: 2 },
-  badge: { color: colors.faint, fontSize: 11, fontWeight: '700' },
+  momentTime: { color: colors.text, fontSize: 15, fontFamily: fonts.heavy, minWidth: 54 },
+  momentWord: { color: colors.text, fontSize: 16, fontFamily: fonts.bold },
+  momentNote: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, marginTop: 2 },
+  badge: { color: colors.faint, fontSize: 13, fontFamily: fonts.bold },
   structRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -567,23 +592,23 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   structSwatch: { width: 14, height: 40, borderRadius: 4 },
-  structName: { color: colors.text, fontSize: 16, fontWeight: '800' },
-  structMeta: { color: colors.muted, fontSize: 13, marginTop: 2 },
-  structCount: { color: colors.faint, fontSize: 13, fontWeight: '700' },
-  keyName: { color: colors.text, fontSize: 26, fontWeight: '900' },
-  cardHeading: { color: colors.text, fontSize: 17, fontWeight: '800', marginBottom: 6 },
+  structName: { color: colors.text, fontSize: 17, fontFamily: fonts.heavy },
+  structMeta: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, marginTop: 2 },
+  structCount: { color: colors.faint, fontSize: 15, fontFamily: fonts.bold },
+  keyName: { color: colors.text, fontSize: 26, fontFamily: fonts.display },
+  cardHeading: { color: colors.text, fontSize: 18, fontFamily: fonts.heavy, marginBottom: 6 },
   transposer: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 14 },
   shift: {
     color: colors.text,
-    fontWeight: '800',
-    fontSize: 15,
+    fontSize: 16,
+    fontFamily: fonts.heavy,
     minWidth: 120,
     textAlign: 'center',
   },
-  rangeText: { color: colors.muted, marginTop: 12, fontSize: 14 },
+  rangeText: { color: colors.muted, marginTop: 12, fontSize: 15, fontFamily: fonts.regular },
   infoRow: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
-  infoKey: { color: colors.faint, fontSize: 14, width: 170 },
-  infoVal: { color: colors.text, fontSize: 14, fontWeight: '600', flex: 1, minWidth: 160 },
+  infoKey: { color: colors.faint, fontSize: 15, fontFamily: fonts.regular, width: 170 },
+  infoVal: { color: colors.text, fontSize: 15, fontFamily: fonts.bold, flex: 1, minWidth: 160 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   player: { borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.surface },
   playerInner: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12 },
@@ -595,7 +620,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  playIcon: { color: '#fff', fontSize: 18, fontWeight: '900' },
-  playerTitle: { color: colors.text, fontWeight: '800', fontSize: 15 },
-  playerHint: { color: colors.faint, fontSize: 12, marginTop: 2 },
+  playIcon: { color: '#fff', fontSize: 18, fontFamily: fonts.heavy },
+  playerTitle: { color: colors.text, fontSize: 16, fontFamily: fonts.heavy },
+  playerHint: { color: colors.faint, fontSize: 14, fontFamily: fonts.regular, marginTop: 2 },
 });

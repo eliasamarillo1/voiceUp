@@ -6,7 +6,7 @@ import { techniqueById } from '../../data/techniques';
 import type { Technique } from '../../data/types';
 import { YouTubeEmbed } from '../../components/YouTubeEmbed';
 import { Body, Card, LinkButton, Page, SectionTitle } from '../../components/ui';
-import { colors, formatTime, radius } from '../../theme';
+import { fonts, colors, formatTime, radius } from '../../theme';
 
 export default function TechniqueScreen() {
   const { id, song: songId } = useLocalSearchParams<{ id: string; song?: string }>();
@@ -192,10 +192,23 @@ function TechniqueDetail({ t, fromSongId }: { t: Technique; fromSongId?: string 
 
 const styles = StyleSheet.create({
   hero: { paddingBottom: 28 },
-  back: { color: colors.muted, fontSize: 15, fontWeight: '600', paddingTop: 24, paddingBottom: 20 },
-  kicker: { fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
-  title: { color: colors.text, fontSize: 44, fontWeight: '900', letterSpacing: -1, marginTop: 6 },
-  summary: { color: colors.muted, fontSize: 18, lineHeight: 26, marginTop: 8, maxWidth: 640 },
+  back: {
+    color: colors.muted,
+    fontSize: 16,
+    fontFamily: fonts.bold,
+    paddingTop: 24,
+    paddingBottom: 20,
+  },
+  kicker: { fontSize: 15, fontFamily: fonts.heavy, letterSpacing: 1 },
+  title: { color: colors.text, fontSize: 44, fontFamily: fonts.display, marginTop: 6 },
+  summary: {
+    color: colors.muted,
+    fontSize: 18,
+    fontFamily: fonts.regular,
+    lineHeight: 26,
+    marginTop: 8,
+    maxWidth: 640,
+  },
   moment: {
     flexDirection: 'row',
     gap: 14,
@@ -205,9 +218,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderLeftWidth: 4,
   },
-  momentTime: { color: colors.text, fontWeight: '800', minWidth: 44 },
-  momentLine: { color: colors.text, fontWeight: '700', fontSize: 15 },
-  momentNote: { color: colors.muted, fontSize: 13, marginTop: 2 },
+  momentTime: { color: colors.text, fontFamily: fonts.heavy, minWidth: 44 },
+  momentLine: { color: colors.text, fontSize: 16, fontFamily: fonts.bold },
+  momentNote: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, marginTop: 2 },
   step: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   stepNum: {
     width: 26,
@@ -216,18 +229,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepNumText: { color: '#FFFFFF', fontWeight: '900' },
-  stepText: { color: colors.muted, fontSize: 15, lineHeight: 22, flex: 1, paddingTop: 2 },
+  stepNumText: { color: '#FFFFFF', fontFamily: fonts.heavy },
+  stepText: {
+    color: colors.muted,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    lineHeight: 22,
+    flex: 1,
+    paddingTop: 2,
+  },
   exHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  exTitle: { color: colors.text, fontSize: 16, fontWeight: '800', flex: 1 },
-  exToggle: { fontSize: 24, fontWeight: '800' },
-  exStep: { color: colors.muted, fontSize: 15, lineHeight: 22 },
+  exTitle: { color: colors.text, fontSize: 17, fontFamily: fonts.heavy, flex: 1 },
+  exToggle: { fontSize: 24, fontFamily: fonts.display },
+  exStep: { color: colors.muted, fontSize: 16, fontFamily: fonts.regular, lineHeight: 22 },
   videos: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
   video: { flexGrow: 1, flexBasis: 280, maxWidth: '100%' },
-  videoTitle: { color: colors.text, fontSize: 14, fontWeight: '700', marginTop: 8 },
-  videoMeta: { color: colors.faint, fontSize: 12, marginTop: 2 },
-  mistake: { color: colors.muted, fontSize: 15, lineHeight: 22 },
+  videoTitle: { color: colors.text, fontSize: 15, fontFamily: fonts.bold, marginTop: 8 },
+  videoMeta: { color: colors.faint, fontSize: 14, fontFamily: fonts.regular, marginTop: 2 },
+  mistake: { color: colors.muted, fontSize: 16, fontFamily: fonts.regular, lineHeight: 22 },
   songRow: { backgroundColor: colors.surface, borderRadius: radius.md, padding: 14 },
-  songTitle: { color: colors.text, fontWeight: '800', fontSize: 16 },
+  songTitle: { color: colors.text, fontSize: 17, fontFamily: fonts.heavy },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
 });

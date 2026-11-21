@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Occurrence, Song } from '../data/types';
 import { techniqueById } from '../data/techniques';
-import { colors, radius, sectionColors } from '../theme';
+import { fonts, colors, radius, sectionColors, sectionText } from '../theme';
 
 /**
  * "Mapa" de la canción: la estructura en bloques de colores, los recursos vocales como puntos
@@ -57,11 +57,11 @@ export function SongMap({
                   {
                     flex: s.end - s.start,
                     backgroundColor: sectionColors[s.type],
-                    opacity: active ? 1 : 0.55,
+                    opacity: active ? 1 : 0.85,
                   },
                 ]}
               >
-                <Text numberOfLines={1} style={styles.blockText}>
+                <Text numberOfLines={1} style={[styles.blockText, { color: sectionText[s.type] }]}>
                   {s.label}
                 </Text>
               </View>
@@ -76,27 +76,31 @@ export function SongMap({
 
 const styles = StyleSheet.create({
   wrap: { width: '100%' },
-  markers: { height: 18, position: 'relative', marginBottom: 6 },
+  markers: { height: 20, position: 'relative', marginBottom: 6 },
   marker: {
     position: 'absolute',
     top: 3,
-    width: 12,
-    height: 12,
-    marginLeft: -6,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: colors.bg,
+    width: 14,
+    height: 14,
+    marginLeft: -7,
+    borderRadius: 7,
+    borderBottomLeftRadius: 0,
+    transform: [{ rotate: '-45deg' }],
+    borderWidth: 1.5,
+    borderColor: colors.gold,
   },
   bar: {
     flexDirection: 'row',
-    height: 44,
+    height: 52,
     borderRadius: radius.md,
     overflow: 'hidden',
     gap: 2,
+    padding: 2,
+    backgroundColor: colors.gold,
     position: 'relative',
   },
   block: { justifyContent: 'center', paddingHorizontal: 6 },
-  blockText: { color: colors.text, fontSize: 11, fontWeight: '700' },
+  blockText: { color: colors.text, fontSize: 15, fontFamily: fonts.bold },
   playhead: {
     position: 'absolute',
     top: 0,
@@ -105,5 +109,7 @@ const styles = StyleSheet.create({
     marginLeft: -1.5,
     backgroundColor: colors.text,
     borderRadius: 2,
+    borderWidth: 0.5,
+    borderColor: '#FFFFFF',
   },
 });

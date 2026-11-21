@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { usePathname } from 'expo-router';
 import { PixelBee } from './PixelBee';
-import { colors, radius } from '../theme';
+import { fonts, colors, radius } from '../theme';
 
 type Page = 'inicio' | 'cancion' | 'recurso' | 'recursos' | 'calentamiento';
 
@@ -12,14 +12,14 @@ const TIPS: Record<Page, string[]> = {
     '¡Hola! Soy Abi, tu ayudante. Busca una canción por su título, su artista o un trozo de la letra.',
     'Las etiquetas de colores de cada canción son sus recursos vocales. Cada recurso tiene siempre el mismo color en toda la app.',
     'Si una canción sale como «todavía no está analizada», es que aún no tenemos su estudio. En la versión final se analizará sola; mientras, puedes escucharla en Spotify o YouTube.',
-    'Más abajo puedes explorar los recursos vocales: toca uno y verás qué es y un ejercicio rápido.',
-    'Antes de cantar, calienta la voz: toca «Empezar» en el aviso rosa.',
+    'Los tres accesos de arriba te llevan a las canciones, a los recursos vocales o al calentamiento.',
+    'Antes de cantar, calienta la voz: toca «Calentar la voz», arriba.',
   ],
   cancion: [
     'Esta es la carpeta de la canción. Arriba tienes el vídeo para escucharla.',
     'La barra de colores es el mapa de la canción: cada bloque es una parte (estrofa, estribillo…) y cada punto, un recurso vocal. Tócala para saltar.',
     'En la letra, las palabras de colores llevan un recurso vocal. Tócalas para aprender a hacerlo.',
-    'El botón rojo de abajo hace avanzar la letra sin sonido, para que la sigas a tu ritmo.',
+    'El botón redondo de abajo hace avanzar la letra sin sonido, para que la sigas a tu ritmo.',
     '«Automático · 86 %» significa que lo detectó el análisis automático y lo seguro que está. «Revisado» quiere decir que lo comprobó una persona.',
     'En «Tonalidades» puedes subir o bajar la canción para adaptarla a tu voz.',
   ],
@@ -76,7 +76,6 @@ export function BeeHelper() {
   // En la canción hay una barra de reproducción abajo: Abi se coloca encima.
   const bottom = page === 'cancion' ? 92 : 20;
 
-
   return (
     <View pointerEvents="box-none" style={[styles.wrap, { bottom }]}>
       {open && (
@@ -118,7 +117,7 @@ export function BeeHelper() {
         accessibilityLabel={open ? 'Cerrar la ayuda de Abi' : 'Abrir la ayuda de Abi, la abejita'}
         style={({ pressed }) => [styles.beeBtn, pressed && { transform: [{ scale: 0.94 }] }]}
       >
-        <PixelBee size={4} />
+        <PixelBee size={3} />
       </Pressable>
     </View>
   );
@@ -136,8 +135,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1.5,
-    borderColor: '#FFC93C',
+    borderColor: colors.gold,
     padding: 14,
+    outlineWidth: 3,
+    outlineStyle: 'solid',
+    outlineColor: colors.frame,
+    outlineOffset: 3,
     marginBottom: 10,
     shadowColor: '#1D1828',
     shadowOpacity: 0.12,
@@ -145,8 +148,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 4,
   },
-  name: { color: '#B7791F', fontSize: 12, fontWeight: '900', letterSpacing: 0.5 },
-  tip: { color: colors.text, fontSize: 14, lineHeight: 20, marginTop: 4 },
+  name: { color: colors.frameDark, fontSize: 14, fontFamily: fonts.heavy, letterSpacing: 0.5 },
+  tip: {
+    color: colors.text,
+    fontSize: 15,
+    fontFamily: fonts.regular,
+    lineHeight: 20,
+    marginTop: 4,
+  },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -154,16 +163,16 @@ const styles = StyleSheet.create({
     marginTop: 12,
     gap: 8,
   },
-  count: { color: colors.faint, fontSize: 12, fontWeight: '700' },
+  count: { color: colors.faint, fontSize: 14, fontFamily: fonts.bold },
   btn: {
-    backgroundColor: '#FFC93C',
+    backgroundColor: colors.frame,
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: radius.pill,
   },
-  btnText: { color: '#3A2C2C', fontSize: 13, fontWeight: '800' },
+  btnText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.heavy },
   btnGhost: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: radius.pill },
-  btnGhostText: { color: colors.muted, fontSize: 13, fontWeight: '700' },
+  btnGhostText: { color: colors.muted, fontSize: 15, fontFamily: fonts.bold },
   tail: {
     position: 'absolute',
     right: 24,
@@ -173,16 +182,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRightWidth: 1.5,
     borderBottomWidth: 1.5,
-    borderColor: '#FFC93C',
+    borderColor: colors.gold,
     transform: [{ rotate: '45deg' }],
   },
   beeBtn: {
-    width: 80,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#FFF6DA',
+    width: 84,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.surface,
     borderWidth: 1.5,
-    borderColor: '#FFC93C',
+    borderColor: colors.gold,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1,30 +1,41 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, View } from 'react-native';
 
-// Abi, la abejita de VoiceUp, dibujada en pixel art: cada carácter es un píxel.
+// Abi, la abejita de VoiceUp, en pixel art: cada carácter es un píxel.
+// Alas de cristal verde agua unidas con plomo dorado, como la vidriera, y lirios en las antenas.
 const ART = [
-  '...WWW..WWW.....',
-  '..WHHWW.WHWW....',
-  '..WHWWW.WWWW..K.',
-  '...WWW..WWW..K..',
-  '....KKKKKKKKK...',
-  '...KYYBBYYBYYK..',
-  '..KYYYBBYYBYYYK.',
-  '..KYYYBBYYBYEYK.',
-  'KKKYYYBBYYBYYPK.',
-  '..KYYYBBYYBYKYK.',
-  '...KYYBBYYBYYK..',
-  '....KKKKKKKKK...',
+  '......VV......VV......',
+  '.LLL...O......O...LLL.',
+  'LAAAL...O....O...LAAAL',
+  'LAALSL..OOOOOO..LSLAAL',
+  'LASLSLOOYYHHYYOOLSLSAL',
+  'LSSLAOYYYYHYYYYYOALSSL',
+  '.LSAAOYYYYYYYYYYOAASL.',
+  '..LLLOYEeYYYYEeYOLLL..',
+  '.....OYEEYYYYEEYO.....',
+  '.....OPYYYMMYYYPO.....',
+  '.....OBBBBBBBBBBO.....',
+  '.....OYYYYYYYYYYO.....',
+  '.....OBBBBBBBBBBO.....',
+  '......OyYYYYYYyO......',
+  '.......OOOOOOOO.......',
+  '.......OO....OO.......',
 ];
 
 const PALETTE: Record<string, string> = {
-  W: '#CDEBFF',
-  H: '#FFFFFF',
-  K: '#3A2C2C',
-  Y: '#FFC93C',
-  B: '#3A2C2C',
-  E: '#1D1828',
-  P: '#FF8FA3',
+  O: '#2C2A44',
+  B: '#2C2A44',
+  E: '#2C2A44',
+  Y: '#E9B84E',
+  y: '#D49634',
+  H: '#FBE3A6',
+  e: '#FFFFFF',
+  P: '#E39AA8',
+  M: '#7A3A3A',
+  A: '#CBE7DF',
+  S: '#79B9AD',
+  L: '#B8975A',
+  V: '#6E78CF',
 };
 
 export function PixelBee({ size = 3, still = false }: { size?: number; still?: boolean }) {

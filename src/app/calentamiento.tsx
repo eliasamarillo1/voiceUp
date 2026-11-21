@@ -12,7 +12,7 @@ import { songById } from '../data/songs';
 import { techniqueById } from '../data/techniques';
 import { YouTubeEmbed } from '../components/YouTubeEmbed';
 import { Card, Page, SectionTitle } from '../components/ui';
-import { colors, formatTime, radius } from '../theme';
+import { fonts, colors, formatTime, radius } from '../theme';
 
 export default function WarmupScreen() {
   const { song: songId } = useLocalSearchParams<{ song?: string }>();
@@ -254,16 +254,28 @@ function GuidedRoutine({
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.muted, fontSize: 15, fontWeight: '600', paddingTop: 24, paddingBottom: 16 },
+  back: {
+    color: colors.muted,
+    fontSize: 16,
+    fontFamily: fonts.bold,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
   kicker: {
     color: colors.accent,
-    fontSize: 13,
-    fontWeight: '800',
-    textTransform: 'uppercase',
+    fontSize: 15,
+    fontFamily: fonts.heavy,
     letterSpacing: 1,
   },
-  title: { color: colors.text, fontSize: 38, fontWeight: '900', letterSpacing: -1, marginTop: 6 },
-  sub: { color: colors.muted, fontSize: 16, lineHeight: 23, marginTop: 8, maxWidth: 640 },
+  title: { color: colors.text, fontSize: 38, fontFamily: fonts.display, marginTop: 6 },
+  sub: {
+    color: colors.muted,
+    fontSize: 17,
+    fontFamily: fonts.regular,
+    lineHeight: 23,
+    marginTop: 8,
+    maxWidth: 640,
+  },
   routines: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 24, marginBottom: 16 },
   routine: {
     flexGrow: 1,
@@ -275,8 +287,14 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   routineActive: { borderColor: colors.accent, backgroundColor: colors.accentSoft },
-  routineName: { color: colors.text, fontSize: 18, fontWeight: '900' },
-  routineDesc: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 4 },
+  routineName: { color: colors.text, fontSize: 18, fontFamily: fonts.heavy },
+  routineDesc: {
+    color: colors.muted,
+    fontSize: 15,
+    fontFamily: fonts.regular,
+    lineHeight: 20,
+    marginTop: 4,
+  },
   player: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -284,9 +302,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   playerHead: { padding: 20 },
-  stepCount: { fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 },
-  stepName: { color: colors.text, fontSize: 28, fontWeight: '900', marginTop: 4 },
-  stepGoal: { color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: 4 },
+  stepCount: { fontSize: 14, fontFamily: fonts.heavy, letterSpacing: 0.8 },
+  stepName: { color: colors.text, fontSize: 28, fontFamily: fonts.display, marginTop: 4 },
+  stepGoal: {
+    color: colors.muted,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    lineHeight: 22,
+    marginTop: 4,
+  },
   playerBody: { padding: 20, paddingTop: 12 },
   ins: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', marginBottom: 10 },
   insNum: {
@@ -296,12 +320,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  insNumText: { color: '#FFFFFF', fontWeight: '900', fontSize: 12 },
-  insText: { color: colors.muted, fontSize: 15, lineHeight: 22, flex: 1, paddingTop: 1 },
+  insNumText: { color: '#FFFFFF', fontSize: 14, fontFamily: fonts.heavy },
+  insText: {
+    color: colors.muted,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    lineHeight: 22,
+    flex: 1,
+    paddingTop: 1,
+  },
   timer: {
     color: colors.text,
     fontSize: 48,
-    fontWeight: '900',
+    fontFamily: fonts.display,
     textAlign: 'center',
     marginTop: 12,
     fontVariant: ['tabular-nums'],
@@ -327,7 +358,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderRadius: radius.pill,
   },
-  primaryText: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
+  primaryText: { color: '#FFFFFF', fontSize: 16, fontFamily: fonts.heavy },
   secondary: {
     paddingHorizontal: 18,
     paddingVertical: 13,
@@ -336,7 +367,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  secondaryText: { color: colors.text, fontWeight: '700', fontSize: 15 },
+  secondaryText: { color: colors.text, fontSize: 16, fontFamily: fonts.bold },
   stepList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
   stepChip: {
     flexDirection: 'row',
@@ -350,9 +381,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   stepDot: { width: 8, height: 8, borderRadius: 4 },
-  stepChipText: { color: colors.muted, fontSize: 13, fontWeight: '700' },
+  stepChipText: { color: colors.muted, fontSize: 15, fontFamily: fonts.bold },
   doneCard: { alignItems: 'center', gap: 6, paddingVertical: 28 },
-  doneTitle: { color: colors.text, fontSize: 30, fontWeight: '900' },
+  doneTitle: { color: colors.text, fontSize: 30, fontFamily: fonts.display },
   prepRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   prep: {
     flexGrow: 1,
@@ -364,10 +395,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 4,
     padding: 16,
   },
-  prepName: { fontSize: 18, fontWeight: '900' },
-  prepText: { color: colors.muted, fontSize: 14, marginTop: 4 },
-  prepLink: { color: colors.text, fontSize: 14, fontWeight: '800', marginTop: 10 },
+  prepName: { fontSize: 18, fontFamily: fonts.heavy },
+  prepText: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, marginTop: 4 },
+  prepLink: { color: colors.text, fontSize: 15, fontFamily: fonts.heavy, marginTop: 10 },
   videos: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
   video: { flexGrow: 1, flexBasis: 280, maxWidth: '100%' },
-  videoTitle: { color: colors.text, fontSize: 14, fontWeight: '700', marginTop: 8 },
+  videoTitle: { color: colors.text, fontSize: 15, fontFamily: fonts.bold, marginTop: 8 },
 });

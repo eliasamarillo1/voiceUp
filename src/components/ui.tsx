@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
-import { colors, radius } from '../theme';
+import { fonts, colors, radius } from '../theme';
+import { Fleuron } from './Nouveau';
 
 export function openUrl(url: string) {
   if (Platform.OS === 'web') {
@@ -38,14 +39,14 @@ export function Pill({
       style={({ pressed }) => [
         styles.pill,
         {
-          borderColor: active ? c : colors.border,
-          backgroundColor: active ? `${c}1F` : colors.surface,
+          borderColor: active ? c : colors.goldLight,
+          backgroundColor: active ? c : colors.surface,
         },
         pressed && { opacity: 0.75 },
       ]}
     >
-      {dot && <View style={[styles.dot, { backgroundColor: c }]} />}
-      <Text style={[styles.pillText, active && { color: colors.text }]}>{label}</Text>
+      {dot && <View style={[styles.dot, { backgroundColor: active ? colors.surface : c }]} />}
+      <Text style={[styles.pillText, active && { color: '#FFFFFF' }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -70,6 +71,7 @@ export function LinkButton({
       style={({ pressed }) => [
         styles.linkBtn,
         { backgroundColor: bg },
+        tone === 'default' && { borderWidth: 1.5, borderColor: colors.goldLight },
         pressed && { opacity: 0.8 },
       ]}
     >
@@ -83,8 +85,11 @@ export function LinkButton({
 
 export function SectionTitle({ children, hint }: { children: ReactNode; hint?: string }) {
   return (
-    <View style={{ marginTop: 28, marginBottom: 12 }}>
-      <Text style={styles.sectionTitle}>{children}</Text>
+    <View style={{ marginTop: 36, marginBottom: 14 }}>
+      <View style={styles.titleRow}>
+        <Fleuron size={20} />
+        <Text style={styles.sectionTitle}>{children}</Text>
+      </View>
       {hint && <Text style={styles.hint}>{hint}</Text>}
     </View>
   );
@@ -107,20 +112,27 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: radius.pill,
-    borderWidth: 1,
+    borderWidth: 1.5,
   },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  pillText: { color: colors.muted, fontSize: 14, fontWeight: '600' },
+  pillText: { color: colors.text, fontSize: 16, fontFamily: fonts.bold },
   linkBtn: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius.pill },
-  linkText: { fontWeight: '700', fontSize: 14 },
-  sectionTitle: { color: colors.text, fontSize: 20, fontWeight: '800', letterSpacing: -0.3 },
-  hint: { color: colors.muted, fontSize: 14, marginTop: 4 },
+  linkText: { fontSize: 16, fontFamily: fonts.bold },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  sectionTitle: { color: colors.frameDark, fontSize: 26, fontFamily: fonts.display, flexShrink: 1 },
+  hint: {
+    color: colors.muted,
+    fontSize: 17,
+    fontFamily: fonts.regular,
+    marginTop: 4,
+    marginLeft: 30,
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderColor: colors.goldLight,
     padding: 16,
   },
-  body: { color: colors.muted, fontSize: 15, lineHeight: 23 },
+  body: { color: colors.muted, fontSize: 18, fontFamily: fonts.regular, lineHeight: 23 },
 });

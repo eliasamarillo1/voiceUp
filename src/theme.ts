@@ -1,37 +1,78 @@
-// Tema visual de VoiceUp: claro y cálido, con acentos vivos.
-// Cada recurso vocal tiene su propio color (ver data/techniques.ts).
+// Tema visual de VoiceUp: vidriera Art Nouveau con lirios.
+// Fondo crema como el cristal que deja pasar la luz, marcos verde azulado, plomo dorado y fino,
+// y cristales en tonos suaves (lirio, verde agua, oro). Cada recurso vocal conserva su color propio
+// (ver data/techniques.ts).
 export const colors = {
-  bg: '#FAF7F2',
-  surface: '#FFFFFF',
-  surfaceAlt: '#F3EEE6',
-  border: '#E8E1D6',
-  text: '#1D1828',
-  muted: '#5C566B',
-  faint: '#8E879C',
-  accent: '#EE4B57',
-  accentSoft: 'rgba(238,75,87,0.12)',
+  bg: '#F3ECD9',
+  surface: '#FBF7EC',
+  surfaceAlt: '#EFE6CF',
+  border: '#DCCDA6',
+  text: '#2C2A44',
+  muted: '#5A566E',
+  faint: '#8B8597',
+  /** Marco verde azulado de la vidriera. */
+  frame: '#3E8A84',
+  frameDark: '#2C6763',
+  frameLight: '#A8D0C6',
+  /** Plomo dorado que une los cristales. */
+  gold: '#B8975A',
+  goldLight: '#D8C28E',
+  accent: '#2C6763',
+  accentSoft: 'rgba(62,138,132,0.12)',
 };
 
-// Colores de los bloques de la estructura (fondos suaves) y su versión intensa para textos.
+/** Cristales de la vidriera. */
+export const glass = {
+  iris: '#4650AE',
+  irisDark: '#2E3485',
+  irisLight: '#97A0E0',
+  teal: '#3E8A84',
+  leaf: '#5F9C86',
+  amber: '#D9A33A',
+  lavender: '#B7AEDB',
+  cream: '#FFFDF4',
+};
+
+// Color del cristal de cada parte de la canción.
 export const sectionColors: Record<string, string> = {
-  intro: '#E4DFEE',
-  estrofa: '#CFE0F7',
-  preestribillo: '#E2D4F5',
-  estribillo: '#FAD1DA',
-  puente: '#CDEDE7',
-  final: '#E4DFEE',
+  intro: glass.lavender,
+  estrofa: '#7F89D2',
+  preestribillo: '#8DB9B0',
+  estribillo: glass.teal,
+  puente: glass.amber,
+  final: glass.lavender,
 };
 
+// Texto que va encima de cada cristal.
+export const sectionText: Record<string, string> = {
+  intro: '#2C2A44',
+  estrofa: '#FFFFFF',
+  preestribillo: '#2C2A44',
+  estribillo: '#FFFFFF',
+  puente: '#2C2A44',
+  final: '#2C2A44',
+};
+
+// Versión de cada color para textos sobre fondo claro.
 export const sectionInk: Record<string, string> = {
-  intro: '#6B6480',
-  estrofa: '#2F5E9E',
-  preestribillo: '#6A3FB0',
-  estribillo: '#C02E55',
-  puente: '#1F7F70',
-  final: '#6B6480',
+  intro: '#5E52A0',
+  estrofa: '#3F4AA8',
+  preestribillo: '#2C6763',
+  estribillo: '#2C6763',
+  puente: '#93650F',
+  final: '#5E52A0',
 };
 
-export const radius = { sm: 8, md: 14, lg: 22, pill: 999 };
+/** Tipografías: Federo (Art Nouveau) para títulos y Alegreya Sans (humanista, caligráfica) para el texto. */
+export const fonts = {
+  display: 'Federo_400Regular',
+  regular: 'AlegreyaSans_400Regular',
+  medium: 'AlegreyaSans_500Medium',
+  bold: 'AlegreyaSans_700Bold',
+  heavy: 'AlegreyaSans_800ExtraBold',
+};
+
+export const radius = { sm: 6, md: 12, lg: 18, pill: 999, arch: 120 };
 
 export const formatTime = (s: number) => {
   const m = Math.floor(s / 60);
