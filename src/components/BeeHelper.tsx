@@ -220,6 +220,11 @@ export function BeeHelper() {
     };
   }, [reduceMotion, tip, chatOpen, flyTo, pos, lane.minX, lane.maxX, bounds.minY, bounds.maxY]);
 
+  // En móvil, asomada desde el borde derecho, Abi siempre mira hacia dentro de la pantalla.
+  useEffect(() => {
+    if (!wide) setFacing(-1);
+  }, [wide, tip]);
+
   // Si cambia el tamaño de la ventana, que vuelva a su lateral y no se quede fuera.
   useEffect(() => {
     if (chatOpen) return;
