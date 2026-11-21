@@ -43,8 +43,7 @@ export function CatalogResults({ query }: { query: string }) {
         {state.loading && <ActivityIndicator color={colors.frame} size="small" />}
       </View>
       <Text style={styles.hint}>
-        Elige una canción y VoiceUp prepara su ficha automáticamente: tonalidad, tempo, estructura y
-        recursos vocales.
+        Toca una canción para abrir su análisis: tonalidad, tempo, estructura y recursos vocales.
       </Text>
 
       {state.items.map((t) => (
@@ -72,7 +71,7 @@ export function CatalogResults({ query }: { query: string }) {
               {t.album ? ` · ${t.album}` : ''}
             </Text>
           </View>
-          <Text style={styles.go}>Ver ficha →</Text>
+          <Text style={styles.go}>Ver análisis →</Text>
         </Pressable>
       ))}
 

@@ -21,8 +21,19 @@ import {
 } from '../../lib/songCatalog';
 import { analyzeAudio, type AudioEstimate } from '../../lib/audioKey';
 import { Frame } from '../../components/Nouveau';
-import { Body, Card, LinkButton, Page, SectionTitle } from '../../components/ui';
+import { Instrumental } from '../../components/Instrumental';
+import { Body, Card, LinkButton, Page, Pill } from '../../components/ui';
 import { colors, fonts, formatTime, radius, sectionColors, sectionInk } from '../../theme';
+
+const TABS = [
+  { id: 'recursos', label: 'Recursos vocales' },
+  { id: 'estructura', label: 'Estructura' },
+  { id: 'tonos', label: 'Tonalidades' },
+  { id: 'letra', label: 'Letra' },
+  { id: 'instrumental', label: 'Instrumental' },
+  { id: 'info', label: 'Información y fuentes' },
+] as const;
+type TabId = (typeof TABS)[number]['id'];
 
 type Load<T> = { state: 'idle' | 'loading' | 'ok' | 'error'; value?: T; error?: string };
 
@@ -30,6 +41,7 @@ export default function AutoSongScreen() {
   const params = useLocalSearchParams<{ id: string }>();
   const id = String(params.id ?? '');
   const [track, setTrack] = useState<Load<CatalogTrack>>({ state: 'loading' });
+  const [tab, setTab] = useState<TabId>('recursos');
   const [audio, setAudio] = useState<Load<AudioEstimate>>({ state: 'idle' });
   const [ai, setAi] = useState<Load<SongAnalysis>>(() => {
     const saved = savedAnalysis(id);
@@ -157,6 +169,8 @@ export default function AutoSongScreen() {
           {duration ? <Stat label="Duración" value={formatTime(duration)} /> : null}
         </View>
 
+        <AiPanel state={ai} onRetry={generate} />
+
         <Card style={styles.listen}>
           <Text style={styles.cardTitle}>Escúchala</Text>
           {Platform.OS === 'web' && previewAudioUrl(t)
@@ -176,123 +190,154 @@ export default function AutoSongScreen() {
           </View>
         </Card>
 
-        <AiPanel state={ai} onRetry={generate} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 24 }}>
+          <View style={styles.tabs}>
+            {TABS.map((x) => (
+              <Pill key={x.id} label={x.label} active={tab === x.id} onPress={() => setTab(x.id)} />
+            ))}
+          </View>
+        </ScrollView>
 
-        {a && (
-          <>
-            {a.about ? (
-              <>
-                <SectionTitle>Sobre la canción</SectionTitle>
-                <Body>{a.about}</Body>
-              </>
-            ) : null}
-
-            {a.sections?.length > 0 && (
-              <>
-                <SectionTitle hint="Partes de la canción y su momento aproximado en la grabación original">
-                  Estructura
-                </SectionTitle>
-                <Frame>
-                  <StructureBar sections={a.sections} duration={duration || a.sections.at(-1)!.end} />
-                  <View style={{ gap: 6, marginTop: 14 }}>
-                    {a.sections.map((s, i) => (
-                      <View key={i} style={styles.sectionRow}>
-                        <View style={[styles.dot, { backgroundColor: sectionColors[s.type] ?? colors.frame }]} />
-                        <Text style={[styles.sectionLabel, { color: sectionInk[s.type] ?? colors.text }]}>
-                          {s.label}
-                        </Text>
-                        <Text style={styles.small}>
-                          {formatTime(s.start)}–{formatTime(s.end)}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </Frame>
-              </>
-            )}
-
-            <SectionTitle hint="Cambios de tono a lo largo de la canción">Tonalidades</SectionTitle>
-            <Card style={{ gap: 8 }}>
-              {(a.keys?.length ? a.keys : [{ key: a.mainKey, start: 0, end: duration, note: '' }]).map((k, i) => (
-                <View key={i} style={styles.sectionRow}>
-                  <Text style={styles.keyName}>{k.key}</Text>
+        <View style={{ marginTop: 18 }}>
+          {tab === 'recursos' &&
+            (a ? (
+              a.techniques?.length ? (
+                <View style={{ gap: 10 }}>
                   <Text style={styles.small}>
-                    {formatTime(k.start)}–{formatTime(k.end)}
-                    {k.note ? ` · ${k.note}` : ''}
+                    Toca uno para ver qué es, cómo se hace y ejercicios para entrenarlo.
                   </Text>
+                  {a.techniques.map((o, i) => {
+                    const tech = techniqueById(o.techniqueId);
+                    if (!tech) return null;
+                    return (
+                      <Pressable
+                        key={i}
+                        accessibilityRole="link"
+                        onPress={() => router.push({ pathname: '/recurso/[id]', params: { id: tech.id } })}
+                        style={({ pressed }) => [styles.tech, pressed && { transform: [{ scale: 0.98 }] }]}
+                      >
+                        <View style={[styles.techBar, { backgroundColor: tech.color }]} />
+                        <View style={{ flex: 1, gap: 3 }}>
+                          <Text style={styles.techName}>
+                            {tech.name} <Text style={styles.small}>· {o.section}</Text>
+                          </Text>
+                          {o.where ? <Text style={styles.where}>«{o.where}»</Text> : null}
+                          <Text style={styles.techNote}>{o.note}</Text>
+                        </View>
+                        <Text style={styles.techGo}>Ejercicios →</Text>
+                      </Pressable>
+                    );
+                  })}
                 </View>
-              ))}
-              {audioKey && a.mainKey && !sameKey(audioKey, a.mainKey) && (
+              ) : (
+                <Body>El análisis no encontró recursos vocales claros en esta canción.</Body>
+              )
+            ) : (
+              <Pending
+                state={ai.state}
+                what="Aquí aparecerán los recursos vocales de esta canción (vibrato, falsete, belting…), en qué parte suena cada uno y un enlace a sus ejercicios y vídeos."
+              />
+            ))}
+
+          {tab === 'estructura' &&
+            (a?.sections?.length ? (
+              <Frame>
+                <StructureBar sections={a.sections} duration={duration || a.sections.at(-1)!.end} />
+                <View style={{ gap: 6, marginTop: 14 }}>
+                  {a.sections.map((s, i) => (
+                    <View key={i} style={styles.sectionRow}>
+                      <View style={[styles.dot, { backgroundColor: sectionColors[s.type] ?? colors.frame }]} />
+                      <Text style={[styles.sectionLabel, { color: sectionInk[s.type] ?? colors.text }]}>
+                        {s.label}
+                      </Text>
+                      <Text style={styles.small}>
+                        {formatTime(s.start)}–{formatTime(s.end)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+                <Text style={[styles.small, { marginTop: 10 }]}>
+                  Momentos aproximados en la grabación original.
+                </Text>
+              </Frame>
+            ) : (
+              <Pending
+                state={ai.state}
+                what="Aquí aparecerá el mapa de la canción: intro, estrofas, estribillos y puente, con el minuto en que empieza cada parte."
+              />
+            ))}
+
+          {tab === 'tonos' && (
+            <Card style={{ gap: 8 }}>
+              {audio.value ? (
+                <View style={styles.sectionRow}>
+                  <Text style={styles.keyName}>{audio.value.key}</Text>
+                  <Text style={styles.small}>calculada escuchando el fragmento de 30 s · {audio.value.bpm} BPM</Text>
+                </View>
+              ) : audio.state === 'loading' ? (
+                <Text style={styles.small}>Calculando la tonalidad del fragmento…</Text>
+              ) : null}
+              {a ? (
+                (a.keys?.length ? a.keys : [{ key: a.mainKey, start: 0, end: duration, note: '' }]).map((k, i) => (
+                  <View key={i} style={styles.sectionRow}>
+                    <Text style={styles.keyName}>{k.key}</Text>
+                    <Text style={styles.small}>
+                      {formatTime(k.start)}–{formatTime(k.end)}
+                      {k.note ? ` · ${k.note}` : ''}
+                    </Text>
+                  </View>
+                ))
+              ) : (
                 <Text style={styles.small}>
-                  Ojo: el cálculo del audio da {audioKey} y la IA dice {a.mainKey}. Pueden ser tonalidades
-                  relativas o un cambio de tono fuera del fragmento. Fíate de tu oído.
+                  Los cambios de tono de toda la canción llegarán con el análisis completo.
+                </Text>
+              )}
+              {audioKey && a?.mainKey && !sameKey(audioKey, a.mainKey) && (
+                <Text style={styles.small}>
+                  Ojo: el cálculo del audio da {audioKey} y el análisis dice {a.mainKey}. Pueden ser
+                  tonalidades relativas o un cambio de tono fuera del fragmento. Fíate de tu oído.
                 </Text>
               )}
             </Card>
+          )}
 
-            <SectionTitle hint="Toca uno para ver qué es, cómo se hace y ejercicios para entrenarlo">
-              Recursos vocales
-            </SectionTitle>
-            {a.techniques?.length ? (
-              <View style={{ gap: 10 }}>
-                {a.techniques.map((o, i) => {
-                  const tech = techniqueById(o.techniqueId);
-                  if (!tech) return null;
-                  return (
-                    <Pressable
-                      key={i}
-                      accessibilityRole="link"
-                      onPress={() => router.push({ pathname: '/recurso/[id]', params: { id: tech.id } })}
-                      style={({ pressed }) => [styles.tech, pressed && { transform: [{ scale: 0.98 }] }]}
-                    >
-                      <View style={[styles.techBar, { backgroundColor: tech.color }]} />
-                      <View style={{ flex: 1, gap: 3 }}>
-                        <Text style={styles.techName}>
-                          {tech.name} <Text style={styles.small}>· {o.section}</Text>
-                        </Text>
-                        {o.where ? <Text style={styles.where}>«{o.where}»</Text> : null}
-                        <Text style={styles.techNote}>{o.note}</Text>
-                      </View>
-                      <Text style={styles.techGo}>Ejercicios →</Text>
-                    </Pressable>
-                  );
-                })}
+          {tab === 'letra' && (
+            <Card style={{ gap: 12 }}>
+              <Body>
+                La letra tiene derechos de autor, así que no la copiamos aquí. Puedes leerla en webs que
+                tienen licencia para mostrarla:
+              </Body>
+              <View style={styles.row}>
+                <LinkButton label="Letra en Genius" url={geniusSearchUrl(t)} />
+                <LinkButton label="Letra en Musixmatch" url={musixmatchSearchUrl(t)} />
               </View>
-            ) : (
-              <Body>La IA no encontró recursos vocales claros en esta canción.</Body>
-            )}
-          </>
-        )}
+            </Card>
+          )}
 
-        <SectionTitle>Letra</SectionTitle>
-        <Card style={{ gap: 12 }}>
-          <Body>
-            La letra tiene derechos de autor, así que no la copiamos aquí. Puedes leerla en webs que tienen
-            licencia para mostrarla:
-          </Body>
-          <View style={styles.row}>
-            <LinkButton label="Letra en Genius" url={geniusSearchUrl(t)} />
-            <LinkButton label="Letra en Musixmatch" url={musixmatchSearchUrl(t)} />
-          </View>
-        </Card>
+          {tab === 'instrumental' && (
+            <Instrumental query={query} songKey={mainKey?.value} keyOrigin={mainKey?.origin} />
+          )}
 
-        <SectionTitle>Cómo se hizo esta ficha</SectionTitle>
-        <Card style={{ gap: 10 }}>
-          <Body>
-            Título, artista, álbum y fragmento: catálogo de Deezer. Tonalidad y tempo: calculados escuchando
-            el fragmento de 30 segundos, así que no ven cambios de tono fuera de él.
-            {a
-              ? ` Estructura, tonalidades, rango y recursos vocales: estimación de la IA (${a.model}), que puede equivocarse.`
-              : ''}
-          </Body>
-          {a?.notes ? <Text style={styles.small}>Nota de la IA: {a.notes}</Text> : null}
-          <View style={styles.row}>
-            {a?.sources
-              ?.filter((s) => /^https:\/\//.test(s.url))
-              .slice(0, 6)
-              .map((s, i) => <LinkButton key={i} label={s.label} url={s.url} />)}
-          </View>
-        </Card>
+          {tab === 'info' && (
+            <Card style={{ gap: 10 }}>
+              {a?.about ? <Body>{a.about}</Body> : null}
+              <Body>
+                Título, artista, álbum y fragmento: catálogo de Deezer. Tonalidad y tempo: calculados
+                escuchando el fragmento de 30 segundos, así que no ven cambios de tono fuera de él.
+                {a
+                  ? ` Estructura, tonalidades, rango y recursos vocales: análisis automático con IA (${a.model}), que puede equivocarse.`
+                  : ' Estructura y recursos vocales: pendientes del análisis automático.'}
+              </Body>
+              {a?.notes ? <Text style={styles.small}>Nota del análisis: {a.notes}</Text> : null}
+              <View style={styles.row}>
+                {a?.sources
+                  ?.filter((s) => /^https:\/\//.test(s.url))
+                  .slice(0, 6)
+                  .map((s, i) => <LinkButton key={i} label={s.label} url={s.url} />)}
+              </View>
+            </Card>
+          )}
+        </View>
       </Page>
     </ScrollView>
   );
@@ -306,26 +351,15 @@ function AiPanel({ state, onRetry }: { state: Load<SongAnalysis>; onRetry: () =>
     return (
       <View style={styles.badge}>
         <Text style={styles.badgeText}>
-          ✦ Análisis automático: es una estimación de la IA
-          {v.confidence < 0.5 || !v.known ? ', con poca seguridad para esta canción' : ''}.
+          ✦ Análisis vocal listo. Es automático, así que puede equivocarse
+          {v.confidence < 0.5 || !v.known ? ' (poca seguridad en esta canción)' : ''}.
         </Text>
       </View>
     );
   }
-  if (!analysisOnline()) {
-    return (
-      <Card style={{ marginTop: 16, gap: 6 }}>
-        <Text style={styles.cardTitle}>Estructura y recursos vocales, muy pronto</Text>
-        <Body>
-          Esta parte la prepara la IA y se activará cuando VoiceUp tenga su servidor en marcha. De momento ves
-          los datos del catálogo y la tonalidad y el tempo calculados del audio.
-        </Body>
-      </Card>
-    );
-  }
   if (state.state === 'loading') {
     return (
-      <Card style={{ marginTop: 16, flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+      <Card style={{ marginTop: 20, flexDirection: 'row', gap: 12, alignItems: 'center' }}>
         <ActivityIndicator color={colors.frame} />
         <Body>Analizando la canción: estructura, tonalidades y recursos vocales. Tarda unos segundos…</Body>
       </Card>
@@ -333,15 +367,47 @@ function AiPanel({ state, onRetry }: { state: Load<SongAnalysis>; onRetry: () =>
   }
   if (state.state === 'error') {
     return (
-      <Card style={{ marginTop: 16, gap: 10 }}>
-        <Body>No se pudo generar el análisis. {state.error}</Body>
+      <Card style={{ marginTop: 20, gap: 10 }}>
+        <Body>No se pudo hacer el análisis vocal. {state.error}</Body>
         <Pressable onPress={onRetry} accessibilityRole="button">
           <Text style={styles.retry}>Intentar otra vez</Text>
         </Pressable>
       </Card>
     );
   }
-  return null;
+  // Sin servidor de análisis todavía.
+  return (
+    <Frame style={{ marginTop: 20 }}>
+      <Text style={styles.pendingKicker}>ANÁLISIS VOCAL</Text>
+      <Text style={styles.cardTitle}>Pendiente de activar</Text>
+      <Body>
+        Ya tienes la tonalidad y el tempo, calculados escuchando la canción. La estructura y los recursos
+        vocales los prepara el análisis automático, que todavía no está conectado. Cuando se active,
+        aparecerán solos en las pestañas de abajo, igual que en las canciones de ejemplo.
+      </Body>
+      <Pressable
+        accessibilityRole="link"
+        onPress={() => router.push('/cancion/amazing-grace')}
+        style={({ pressed }) => [styles.exampleBtn, pressed && { transform: [{ scale: 0.97 }] }]}
+      >
+        <Text style={styles.exampleBtnText}>Ver cómo queda en una canción de ejemplo →</Text>
+      </Pressable>
+    </Frame>
+  );
+}
+
+function Pending({ state, what }: { state: Load<SongAnalysis>['state']; what: string }) {
+  return (
+    <View style={styles.pending}>
+      <View style={styles.sectionRow}>
+        {state === 'loading' ? <ActivityIndicator color={colors.frame} size="small" /> : null}
+        <Text style={styles.pendingKicker}>
+          {state === 'loading' ? 'ANALIZANDO…' : 'ANÁLISIS PENDIENTE'}
+        </Text>
+      </View>
+      <Body>{what}</Body>
+    </View>
+  );
 }
 
 function Stat({
@@ -416,6 +482,26 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   badgeText: { color: colors.frameDark, fontSize: 14, fontFamily: fonts.bold },
+  tabs: { flexDirection: 'row', gap: 8, paddingRight: 16 },
+  pending: {
+    gap: 8,
+    padding: 16,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: colors.gold,
+    backgroundColor: colors.surface,
+  },
+  pendingKicker: { color: colors.gold, fontSize: 13, fontFamily: fonts.heavy, letterSpacing: 1 },
+  exampleBtn: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.frameDark,
+    borderRadius: radius.pill,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    marginTop: 12,
+  },
+  exampleBtnText: { color: '#FFFFFF', fontSize: 15, fontFamily: fonts.bold },
   retry: { color: colors.accent, fontSize: 15, fontFamily: fonts.heavy },
   bar: {
     flexDirection: 'row',

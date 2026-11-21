@@ -9,6 +9,8 @@ import { tokenizeLine, transposeKey, transposeNote } from '../../lib/music';
 import { SongMap } from '../../components/SongMap';
 import { Frame } from '../../components/Nouveau';
 import { SheetMusic } from '../../components/SheetMusic';
+import { Instrumental } from '../../components/Instrumental';
+import { chordsBySong } from '../../data/chords';
 import { YouTubeEmbed } from '../../components/YouTubeEmbed';
 import { Body, Card, LinkButton, Page, Pill } from '../../components/ui';
 import { fonts, colors, formatTime, radius, sectionColors, sectionInk } from '../../theme';
@@ -19,6 +21,7 @@ const TABS = [
   { id: 'estructura', label: 'Estructura' },
   { id: 'tonos', label: 'Tonalidades' },
   { id: 'partitura', label: 'Partitura' },
+  { id: 'instrumental', label: 'Instrumental' },
   { id: 'info', label: 'Información' },
   { id: 'escuchar', label: 'Escuchar y fuentes' },
 ] as const;
@@ -156,6 +159,14 @@ function SongFolder({
             )}
             {tab === 'tonos' && <KeysTab song={song} />}
             {tab === 'partitura' && <SheetTab song={song} />}
+            {tab === 'instrumental' && (
+              <Instrumental
+                query={`${song.title} ${song.artist}`}
+                songKey={chordsBySong[song.id]?.key ?? song.mainKey}
+                parts={chordsBySong[song.id]?.parts}
+                tip={chordsBySong[song.id]?.tip}
+              />
+            )}
             {tab === 'info' && <InfoTab song={song} />}
             {tab === 'escuchar' && <ListenTab song={song} />}
           </View>
