@@ -3,13 +3,22 @@ import { WebView } from 'react-native-webview';
 import { colors, radius } from '../theme';
 
 // En iOS y Android el reproductor oficial de YouTube se carga dentro de un WebView.
-export function YouTubeEmbed({ videoId }: { videoId: string; title: string }) {
+export function YouTubeEmbed({
+  videoId,
+  autoplay,
+}: {
+  videoId: string;
+  title: string;
+  autoplay?: boolean;
+}) {
   return (
     <View style={styles.frame}>
       <WebView
-        source={{ uri: `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&playsinline=1` }}
+        source={{
+          uri: `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&playsinline=1${autoplay ? '&autoplay=1' : ''}`,
+        }}
         allowsInlineMediaPlayback
-        mediaPlaybackRequiresUserAction
+        mediaPlaybackRequiresUserAction={!autoplay}
       />
     </View>
   );
