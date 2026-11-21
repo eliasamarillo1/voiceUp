@@ -14,7 +14,7 @@ import { searchSongs, spotifySearchUrl, youtubeSearchUrl } from '../data/songs';
 import { techniqueById } from '../data/techniques';
 import { TechniqueExplorer } from '../components/TechniqueExplorer';
 import { PixelBee } from '../components/PixelBee';
-import { CornerOrnament, Fleuron, Frame, IrisClump } from '../components/Nouveau';
+import { CornerOrnament, Fleuron, Frame, IrisClump, SOFT_SHADOW } from '../components/Nouveau';
 
 import type { Song } from '../data/types';
 import { Card, LinkButton, Page, Pill, SectionTitle } from '../components/ui';
@@ -58,18 +58,22 @@ export default function Home() {
             styles.panel,
             {
               minHeight: wide ? 440 : 600,
-              borderTopLeftRadius: wide ? 264 : 164,
-              borderTopRightRadius: wide ? 264 : 164,
             },
           ]}
         >
           <View
             style={[
               styles.panelInner,
-              { borderTopLeftRadius: wide ? 260 : 160, borderTopRightRadius: wide ? 260 : 160 },
+
               !wide && { justifyContent: 'flex-start', paddingTop: 70, paddingBottom: 190 },
             ]}
           >
+            <View pointerEvents="none" style={styles.panelCornerL}>
+              <CornerOrnament size={wide ? 90 : 64} />
+            </View>
+            <View pointerEvents="none" style={styles.panelCornerR}>
+              <CornerOrnament size={wide ? 90 : 64} flip />
+            </View>
             <View pointerEvents="none" style={[styles.clump, { left: 0 }]}>
               <IrisClump side="left" width={wide ? 230 : 150} />
             </View>
@@ -80,7 +84,10 @@ export default function Home() {
               <Fleuron size={26} />
             </View>
             <View style={[styles.heroText, { maxWidth: wide ? 400 : 340 }]}>
-              <Text style={[styles.hero, wide && { fontSize: 44, lineHeight: 50 }]}>
+              <Text
+                accessibilityRole="header"
+                style={[styles.hero, wide && { fontSize: 44, lineHeight: 50 }]}
+              >
                 ¿Qué quieres cantar hoy?
               </Text>
               <Text style={styles.heroSub}>
@@ -205,7 +212,8 @@ function Door({ title, text, onPress }: { title: string; text: string; onPress: 
       onPress={onPress}
       style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
         styles.door,
-        (hovered || pressed) && { backgroundColor: colors.surfaceAlt },
+        hovered && { backgroundColor: colors.surfaceAlt },
+        pressed && { transform: [{ scale: 0.97 }] },
       ]}
     >
       <Fleuron size={22} color={colors.frame} />
@@ -223,7 +231,8 @@ function SongCard({ song }: { song: Song }) {
       onPress={() => router.push(`/cancion/${song.id}`)}
       style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
         styles.card,
-        (hovered || pressed) && { transform: [{ translateY: -3 }] },
+        hovered && { transform: [{ translateY: -3 }] },
+        pressed && { transform: [{ scale: 0.97 }] },
       ]}
     >
       <Frame
@@ -274,25 +283,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   logo: { color: colors.frameDark, fontSize: 30, fontFamily: fonts.display, letterSpacing: 0.5 },
-  headerLink: { color: colors.text, fontSize: 17, fontFamily: fonts.bold },
+  headerLink: {
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    color: colors.text,
+    fontSize: 17,
+    fontFamily: fonts.bold,
+  },
   nav: { flexDirection: 'row', gap: 20 },
   panel: {
     marginTop: 16,
     borderWidth: 1.5,
     borderColor: colors.gold,
-    borderTopLeftRadius: 999,
-    borderTopRightRadius: 999,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+    borderRadius: 22,
     padding: 3,
+    boxShadow: SOFT_SHADOW,
   },
   panelInner: {
     flex: 1,
     backgroundColor: colors.surface,
     borderWidth: 10,
     borderColor: colors.frame,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+    borderRadius: 19,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -300,6 +312,8 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 40,
   },
+  panelCornerL: { position: 'absolute', top: 6, left: 6 },
+  panelCornerR: { position: 'absolute', top: 6, right: 6 },
   panelKnot: { position: 'absolute', top: 18 },
   clump: { position: 'absolute', bottom: 0 },
   heroWide: { flexDirection: 'row', gap: 40, justifyContent: 'center', marginTop: 24 },
@@ -355,6 +369,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 4,
     borderTopColor: colors.frame,
     padding: 16,
+    boxShadow: SOFT_SHADOW,
     gap: 4,
   },
   doorTitle: { color: colors.text, fontSize: 21, fontFamily: fonts.display, marginTop: 6 },

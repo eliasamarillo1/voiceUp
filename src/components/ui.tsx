@@ -42,7 +42,7 @@ export function Pill({
           borderColor: active ? c : colors.goldLight,
           backgroundColor: active ? c : colors.surface,
         },
-        pressed && { opacity: 0.75 },
+        pressed && { transform: [{ scale: 0.97 }] },
       ]}
     >
       {dot && <View style={[styles.dot, { backgroundColor: active ? colors.surface : c }]} />}
@@ -72,7 +72,7 @@ export function LinkButton({
         styles.linkBtn,
         { backgroundColor: bg },
         tone === 'default' && { borderWidth: 1.5, borderColor: colors.goldLight },
-        pressed && { opacity: 0.8 },
+        pressed && { transform: [{ scale: 0.97 }] },
       ]}
     >
       <Text style={[styles.linkText, { color: fg }]}>
@@ -88,7 +88,9 @@ export function SectionTitle({ children, hint }: { children: ReactNode; hint?: s
     <View style={{ marginTop: 36, marginBottom: 14 }}>
       <View style={styles.titleRow}>
         <Fleuron size={20} />
-        <Text style={styles.sectionTitle}>{children}</Text>
+        <Text accessibilityRole="header" style={styles.sectionTitle}>
+          {children}
+        </Text>
       </View>
       {hint && <Text style={styles.hint}>{hint}</Text>}
     </View>

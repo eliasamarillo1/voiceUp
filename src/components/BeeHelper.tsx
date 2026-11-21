@@ -94,6 +94,7 @@ export function BeeHelper() {
   const current = useRef({ x: width - BEE_W - 24, y: height - BEE_H - 130 });
 
   const [frame, setFrame] = useState<BeeFrame>('idle');
+  const [facing, setFacing] = useState<1 | -1>(-1);
   const [flying, setFlying] = useState(false);
   const [happy, setHappy] = useState(false);
   const [tip, setTip] = useState<number | null>(null);
@@ -160,6 +161,7 @@ export function BeeHelper() {
       const dist = Math.hypot(x - from.x, y - from.y);
       current.current = { x, y };
       setFlying(true);
+      if (Math.abs(x - from.x) > 4) setFacing(x < from.x ? -1 : 1);
       Animated.timing(tilt, {
         toValue: Math.sign(x - from.x),
         duration: 250,
@@ -272,7 +274,7 @@ export function BeeHelper() {
     jump.interpolate({ inputRange: [0, 1, 2], outputRange: [0, -22, 0] }),
   );
   const rotate = Animated.add(
-    tilt.interpolate({ inputRange: [-1, 1], outputRange: [-10, 10] }),
+    tilt.interpolate({ inputRange: [-1, 1], outputRange: [-6, 6] }),
     jump.interpolate({ inputRange: [0, 1, 2], outputRange: [0, 180, 360] }),
   ).interpolate({ inputRange: [-360, 360], outputRange: ['-360deg', '360deg'] });
 
@@ -353,7 +355,9 @@ export function BeeHelper() {
           accessibilityLabel="Abi, la abejita. Tócala para que te dé un consejo"
           hitSlop={8}
         >
-          <PixelBee size={PX} frame={frame} />
+          <View style={{ transform: [{ scaleX: facing }] }}>
+            <PixelBee size={PX} frame={frame} />
+          </View>
         </Pressable>
       </Animated.View>
     </View>

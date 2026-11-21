@@ -7,6 +7,10 @@ import { irisClumpLeft, irisClumpRight } from './irisClumps';
 // Piezas decorativas del estilo vidriera Art Nouveau: el ventanal de lirios, los adornos de
 // las esquinas y el marco doble (verde azulado por fuera, plomo dorado por dentro).
 
+/** Sombra suave en capas para dar profundidad sin bordes duros. */
+export const SOFT_SHADOW =
+  '0 1px 2px rgba(44,42,68,0.06), 0 6px 16px rgba(44,42,68,0.06), 0 18px 40px rgba(44,42,68,0.05)';
+
 /** Mata de lirios que crece desde abajo (para los laterales de la portada). */
 export function IrisClump({ side, width }: { side: 'left' | 'right'; width: number }) {
   const ratio = 340 / 240;
@@ -88,6 +92,7 @@ export function Frame({
           borderBottomLeftRadius: bottom,
           borderBottomRightRadius: bottom,
           padding: 3,
+          boxShadow: SOFT_SHADOW,
         },
         style,
       ]}
@@ -98,9 +103,9 @@ export function Frame({
             flex: 1,
             borderWidth: 1.5,
             borderColor: colors.gold,
-            borderRadius: r - 4,
-            borderBottomLeftRadius: bottom - 4,
-            borderBottomRightRadius: bottom - 4,
+            borderRadius: r - 6,
+            borderBottomLeftRadius: bottom - 6,
+            borderBottomRightRadius: bottom - 6,
             padding: 16,
           },
           innerStyle,

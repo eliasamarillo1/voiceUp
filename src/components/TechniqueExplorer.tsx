@@ -56,7 +56,7 @@ export function TechniqueExplorer({ onShowSongs }: { onShowSongs?: (id: string) 
                   styles.tile,
                   narrow && styles.tileNarrow,
                   active && { borderColor: t.color, backgroundColor: `${t.color}14` },
-                  pressed && { opacity: 0.8 },
+                  pressed && { transform: [{ scale: 0.97 }] },
                 ]}
               >
                 <View style={[styles.tileBar, { backgroundColor: t.color }]} />
@@ -113,7 +113,7 @@ export function TechniqueExplorer({ onShowSongs }: { onShowSongs?: (id: string) 
                 style={({ pressed }) => [
                   styles.primary,
                   { backgroundColor: selected.color },
-                  pressed && { opacity: 0.85 },
+                  pressed && { transform: [{ scale: 0.97 }] },
                 ]}
               >
                 <Text style={styles.primaryText}>Ejercicios y vídeos →</Text>
@@ -122,7 +122,10 @@ export function TechniqueExplorer({ onShowSongs }: { onShowSongs?: (id: string) 
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => onShowSongs(selected.id)}
-                  style={({ pressed }) => [styles.secondary, pressed && { opacity: 0.8 }]}
+                  style={({ pressed }) => [
+                    styles.secondary,
+                    pressed && { transform: [{ scale: 0.97 }] },
+                  ]}
                 >
                   <Text style={styles.secondaryText}>Ver canciones que lo usan</Text>
                 </Pressable>

@@ -96,7 +96,10 @@ function SongFolder({
                 onPress={() =>
                   router.push({ pathname: '/calentamiento', params: { song: song.id } })
                 }
-                style={({ pressed }) => [styles.warmBtn, pressed && { opacity: 0.85 }]}
+                style={({ pressed }) => [
+                  styles.warmBtn,
+                  pressed && { transform: [{ scale: 0.97 }] },
+                ]}
               >
                 <Text style={styles.warmBtnText}>Calentar antes de cantar →</Text>
               </Pressable>
@@ -587,7 +590,13 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     padding: 10,
   },
-  momentTime: { color: colors.text, fontSize: 14, fontFamily: fonts.heavy, minWidth: 54 },
+  momentTime: {
+    fontVariant: ['tabular-nums'],
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: fonts.heavy,
+    minWidth: 54,
+  },
   momentWord: { color: colors.text, fontSize: 15, fontFamily: fonts.bold },
   momentNote: { color: colors.muted, fontSize: 14, fontFamily: fonts.regular, marginTop: 2 },
   badge: { color: colors.faint, fontSize: 13, fontFamily: fonts.bold },
@@ -631,6 +640,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   playIcon: { color: '#fff', fontSize: 17, fontFamily: fonts.heavy },
-  playerTitle: { color: colors.text, fontSize: 15, fontFamily: fonts.heavy },
+  playerTitle: {
+    fontVariant: ['tabular-nums'],
+    color: colors.text,
+    fontSize: 15,
+    fontFamily: fonts.heavy,
+  },
   playerHint: { color: colors.faint, fontSize: 13, fontFamily: fonts.regular, marginTop: 2 },
 });
