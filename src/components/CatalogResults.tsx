@@ -42,9 +42,6 @@ export function CatalogResults({ query }: { query: string }) {
         <Text style={styles.head}>En todo el catálogo</Text>
         {state.loading && <ActivityIndicator color={colors.frame} size="small" />}
       </View>
-      <Text style={styles.hint}>
-        Toca una canción para abrir su análisis: tonalidad, tempo, estructura y recursos vocales.
-      </Text>
 
       {state.items.map((t) => (
         <Pressable

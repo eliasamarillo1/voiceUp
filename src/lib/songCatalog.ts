@@ -134,6 +134,20 @@ export async function searchCatalog(query: string): Promise<CatalogTrack[]> {
   return (data.data ?? []).map(fromDeezer);
 }
 
+/** Canciones más escuchadas ahora mismo en Deezer (lista mundial). */
+export async function popularTracks(limit = 12): Promise<CatalogTrack[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await deezer<{ data?: any[] }>(`/chart/0/tracks?limit=${limit}`);
+  return (data.data ?? []).map(fromDeezer);
+}
+
+/** Últimas canciones con análisis guardado (solo si la función está configurada). */
+export async function recentAnalyses(): Promise<CatalogTrack[]> {
+  if (!analysisOnline()) return [];
+  const { results } = await callFunction<{ results: CatalogTrack[] }>({ action: 'recent' });
+  return results;
+}
+
 /** Datos de una canción por su id de Deezer (para abrir la ficha desde un enlace). */
 export async function getTrack(id: string): Promise<CatalogTrack | undefined> {
   if (!/^\d+$/.test(id)) return undefined;

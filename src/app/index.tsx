@@ -14,6 +14,7 @@ import { searchSongs } from '../data/songs';
 import { techniqueById } from '../data/techniques';
 import { TechniqueExplorer } from '../components/TechniqueExplorer';
 import { CatalogResults } from '../components/CatalogResults';
+import { PopularNow, RecentlyAnalyzed } from '../components/LibrarySections';
 import { CornerOrnament, Fleuron, Frame, IrisClump, SOFT_SHADOW } from '../components/Nouveau';
 
 import type { Song } from '../data/types';
@@ -130,18 +131,33 @@ export default function Home() {
         </View>
 
         <View onLayout={(e) => setLibraryY(e.nativeEvent.layout.y)} />
-        <SectionTitle
-          hint={
-            query && results.length === 0 && !filter
-              ? 'Ninguna canción de ejemplo coincide. Mira debajo en todo el catálogo'
-              : query || filter
-              ? `${results.length} resultado${results.length === 1 ? '' : 's'}`
-              : 'Toca una canción para abrir su carpeta'
-          }
-        >
-          Biblioteca
-        </SectionTitle>
+        {query ? (
+          <>
+            <SectionTitle hint="Toca una canción para abrir su análisis">Resultados</SectionTitle>
+            <CatalogResults query={query} />
+            {results.length > 0 && (
+              <>
+                <Text style={styles.subhead}>También entre los ejemplos</Text>
+                <View style={styles.examples}>
+                  {results.map((s) => (
+                    <ExampleCard key={s.id} song={s} />
+                  ))}
+                </View>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <RecentlyAnalyzed />
+            <PopularNow />
+          </>
+        )}
 
+        {!query && (
+          <>
+            <SectionTitle hint="Tres canciones de dominio público analizadas a mano, para ver cómo es un análisis completo">
+              Prueba un ejemplo
+            </SectionTitle>
         {filter && (
           <View style={styles.activeFilter}>
             <View style={[styles.techDot, { backgroundColor: techniqueById(filter)?.color }]} />
@@ -154,12 +170,11 @@ export default function Home() {
           </View>
         )}
 
-        <View style={styles.grid}>
-          {results.map((s) => (
-            <SongCard key={s.id} song={s} />
-          ))}
-        </View>
-
+            <View style={styles.examples}>
+              {results.map((s) => (
+                <ExampleCard key={s.id} song={s} />
+              ))}
+            </View>
         {results.length === 0 && filter && !query && (
           <Card style={{ gap: 12 }}>
             <Text style={styles.emptyTitle}>
@@ -180,7 +195,8 @@ export default function Home() {
           </Card>
         )}
 
-        {!!query && <CatalogResults query={query} />}
+          </>
+        )}
 
         <SectionTitle hint="Elige un recurso para saber qué es, probar un ejercicio y entrenarlo con vídeos">
           Explora los recursos vocales
@@ -209,55 +225,69 @@ function Door({ title, text, onPress }: { title: string; text: string; onPress: 
   );
 }
 
-function SongCard({ song }: { song: Song }) {
+function ExampleCard({ song }: { song: Song }) {
   const used = [...new Set(song.occurrences.map((o) => o.techniqueId))];
   return (
     <Pressable
       accessibilityRole="link"
       onPress={() => router.push(`/cancion/${song.id}`)}
       style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
-        styles.card,
-        hovered && { transform: [{ translateY: -3 }] },
-        pressed && { transform: [{ scale: 0.97 }] },
+        styles.example,
+        hovered && { backgroundColor: colors.surfaceAlt },
+        pressed && { transform: [{ scale: 0.98 }] },
       ]}
     >
-      <Frame
-        corner={32}
-        style={{ aspectRatio: 1 }}
-        innerStyle={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}
-      >
-        <Text style={styles.cardTitle}>{song.title}</Text>
-        <Text style={styles.cardArtist}>{song.artist}</Text>
-        <Text style={styles.cardMeta}>
-          {song.mainKey} · {song.bpm} BPM · {song.difficulty}
+      <View style={styles.demoRow}>
+        <Text style={styles.demo}>EJEMPLO</Text>
+        <Text style={styles.exampleMeta}>
+          {song.mainKey} · {song.bpm} BPM
         </Text>
-        <View style={styles.miniMap}>
-          {song.sections.map((s, i) => (
-            <View
-              key={i}
-              style={{ flex: s.end - s.start, backgroundColor: sectionColors[s.type], height: 18 }}
-            />
-          ))}
-        </View>
-        <View style={styles.techRow}>
-          {used.slice(0, 5).map((id) => {
-            const t = techniqueById(id);
-            if (!t) return null;
-            return (
-              <View key={id} style={styles.techTag}>
-                <View style={[styles.techDot, { backgroundColor: t.color }]} />
-                <Text style={styles.techTagText}>{t.name}</Text>
-              </View>
-            );
-          })}
-          {used.length > 5 && <Text style={styles.more}>+{used.length - 5} más</Text>}
-        </View>
-      </Frame>
+      </View>
+      <Text style={styles.exampleTitle}>{song.title}</Text>
+      <Text style={styles.exampleArtist}>{song.artist}</Text>
+      <View style={styles.miniMap}>
+        {song.sections.map((s, i) => (
+          <View
+            key={i}
+            style={{ flex: s.end - s.start, backgroundColor: sectionColors[s.type], height: 10 }}
+          />
+        ))}
+      </View>
+      <View style={[styles.techRow, { justifyContent: 'flex-start', alignItems: 'center' }]}>
+        {used.slice(0, 3).map((id) => {
+          const t = techniqueById(id);
+          if (!t) return null;
+          return <View key={id} style={[styles.techDot, { backgroundColor: t.color }]} />;
+        })}
+        <Text style={styles.more}>{used.length} recursos vocales</Text>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  subhead: { color: colors.frameDark, fontSize: 18, fontFamily: fonts.heavy, marginTop: 24, marginBottom: 10 },
+  examples: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  example: {
+    flexGrow: 1,
+    flexBasis: 240,
+    gap: 4,
+    padding: 14,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.goldLight,
+    backgroundColor: colors.surface,
+  },
+  demoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  demo: {
+    color: colors.gold,
+    fontSize: 12,
+    fontFamily: fonts.heavy,
+    letterSpacing: 1,
+  },
+  exampleMeta: { color: colors.faint, fontSize: 13, fontFamily: fonts.medium },
+  exampleTitle: { color: colors.text, fontSize: 17, fontFamily: fonts.heavy },
+  exampleArtist: { color: colors.muted, fontSize: 14, fontFamily: fonts.regular },
   cornerL: { position: 'absolute', top: 0, left: 0 },
   cornerR: { position: 'absolute', top: 0, right: 0 },
   header: {

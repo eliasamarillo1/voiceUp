@@ -15,6 +15,7 @@
 // Peticiones (POST, cuerpo JSON):
 //   { action: 'search', q }                      → { results: CatalogTrack[] }
 //   { action: 'analyze', track: CatalogTrack }   → { analysis: SongAnalysis, cached: boolean }
+//   { action: 'recent' }                         → { results: CatalogTrack[] } (últimas fichas guardadas)
 // Petición GET:
 //   ?preview=<id de Deezer>                      → audio mp3 de 30 s
 
@@ -323,6 +324,15 @@ Deno.serve(async (req) => {
       const q = (body.q ?? '').trim().slice(0, 120);
       if (!q) return send(200, { results: [] });
       return send(200, { results: await search(q) });
+    }
+    if (body.action === 'recent') {
+      if (!db) return send(200, { results: [] });
+      const { data } = await db
+        .from('song_analyses')
+        .select('analysis->track')
+        .order('created_at', { ascending: false })
+        .limit(12);
+      return send(200, { results: (data ?? []).map((r: { track: unknown }) => r.track).filter(Boolean) });
     }
     if (body.action === 'analyze') {
       const t = body.track;
