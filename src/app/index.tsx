@@ -14,7 +14,7 @@ import { searchSongs, spotifySearchUrl, youtubeSearchUrl } from '../data/songs';
 import { techniqueById } from '../data/techniques';
 import { TechniqueExplorer } from '../components/TechniqueExplorer';
 import { PixelBee } from '../components/PixelBee';
-import { CornerOrnament, Fleuron, Frame, IrisWindow } from '../components/Nouveau';
+import { CornerOrnament, Fleuron, Frame, IrisClump } from '../components/Nouveau';
 
 import type { Song } from '../data/types';
 import { Card, LinkButton, Page, Pill, SectionTitle } from '../components/ui';
@@ -53,28 +53,53 @@ export default function Home() {
           </View>
         </View>
 
-        <View style={[styles.heroWrap, wide && styles.heroWide]}>
-          <IrisWindow width={wide ? 280 : 220} />
-          <View style={[styles.heroText, wide && { alignItems: 'flex-start' }]}>
-            <Text
-              style={[styles.hero, wide && { textAlign: 'left', fontSize: 50, lineHeight: 56 }]}
-            >
-              ¿Qué quieres cantar hoy?
-            </Text>
-            <Text style={[styles.heroSub, wide && { textAlign: 'left' }]}>
-              Busca una canción para ver cómo está hecha, o aprende a entrenar cada recurso vocal.
-            </Text>
-            <View style={styles.searchBox}>
-              <Text style={styles.searchIcon}>⌕</Text>
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder="Canción, artista o un trozo de la letra"
-                placeholderTextColor={colors.faint}
-                style={styles.input}
-                autoCorrect={false}
-                accessibilityLabel="Buscar canción"
-              />
+        <View
+          style={[
+            styles.panel,
+            {
+              minHeight: wide ? 440 : 600,
+              borderTopLeftRadius: wide ? 264 : 164,
+              borderTopRightRadius: wide ? 264 : 164,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.panelInner,
+              { borderTopLeftRadius: wide ? 260 : 160, borderTopRightRadius: wide ? 260 : 160 },
+              !wide && { justifyContent: 'flex-start', paddingTop: 70, paddingBottom: 190 },
+            ]}
+          >
+            <View pointerEvents="none" style={[styles.clump, { left: 0 }]}>
+              <IrisClump side="left" width={wide ? 230 : 150} />
+            </View>
+            <View pointerEvents="none" style={[styles.clump, { right: 0 }]}>
+              <IrisClump side="right" width={wide ? 230 : 150} />
+            </View>
+            <View style={styles.panelKnot}>
+              <Fleuron size={26} />
+            </View>
+            <View style={[styles.heroText, { maxWidth: wide ? 400 : 340 }]}>
+              <Text style={[styles.hero, wide && { fontSize: 44, lineHeight: 50 }]}>
+                ¿Qué quieres cantar hoy?
+              </Text>
+              <Text style={styles.heroSub}>
+                Busca una canción para ver cómo está hecha, o aprende a entrenar cada recurso vocal.
+              </Text>
+              <View style={styles.searchBox}>
+                <Text style={styles.searchIcon}>⌕</Text>
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder={
+                    wide ? 'Canción, artista o un trozo de la letra' : 'Canción, artista o letra'
+                  }
+                  placeholderTextColor={colors.faint}
+                  style={styles.input}
+                  autoCorrect={false}
+                  accessibilityLabel="Buscar canción"
+                />
+              </View>
             </View>
           </View>
         </View>
@@ -251,7 +276,32 @@ const styles = StyleSheet.create({
   logo: { color: colors.frameDark, fontSize: 30, fontFamily: fonts.display, letterSpacing: 0.5 },
   headerLink: { color: colors.text, fontSize: 17, fontFamily: fonts.bold },
   nav: { flexDirection: 'row', gap: 20 },
-  heroWrap: { alignItems: 'center', gap: 8, marginTop: 12 },
+  panel: {
+    marginTop: 16,
+    borderWidth: 1.5,
+    borderColor: colors.gold,
+    borderTopLeftRadius: 999,
+    borderTopRightRadius: 999,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    padding: 3,
+  },
+  panelInner: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderWidth: 10,
+    borderColor: colors.frame,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 40,
+  },
+  panelKnot: { position: 'absolute', top: 18 },
+  clump: { position: 'absolute', bottom: 0 },
   heroWide: { flexDirection: 'row', gap: 40, justifyContent: 'center', marginTop: 24 },
   heroText: { alignItems: 'center', flexShrink: 1, maxWidth: 520, width: '100%' },
   hero: {

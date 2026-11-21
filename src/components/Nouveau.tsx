@@ -2,16 +2,21 @@ import type { ReactNode } from 'react';
 import { View, type ViewStyle } from 'react-native';
 import Svg, { Circle, G, Path, SvgXml } from 'react-native-svg';
 import { colors } from '../theme';
-import { irisWindowSvg } from './irisWindowSvg';
+import { irisClumpLeft, irisClumpRight } from './irisClumps';
 
 // Piezas decorativas del estilo vidriera Art Nouveau: el ventanal de lirios, los adornos de
 // las esquinas y el marco doble (verde azulado por fuera, plomo dorado por dentro).
 
-/** Ventanal ovalado con lirios, como una vidriera modernista. */
-export function IrisWindow({ width = 250 }: { width?: number }) {
+/** Mata de lirios que crece desde abajo (para los laterales de la portada). */
+export function IrisClump({ side, width }: { side: 'left' | 'right'; width: number }) {
+  const ratio = 340 / 240;
   return (
     <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <SvgXml xml={irisWindowSvg} width={width} height={width * 1.2} />
+      <SvgXml
+        xml={side === 'left' ? irisClumpLeft : irisClumpRight}
+        width={width}
+        height={width * ratio}
+      />
     </View>
   );
 }
