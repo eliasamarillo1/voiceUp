@@ -20,13 +20,6 @@ import { LinkButton } from './ui';
 
 const GAP = 16;
 
-function formatViews(n: number) {
-  if (n >= 1_000_000)
-    return `${(n / 1_000_000).toFixed(1).replace('.0', '').replace('.', ',')} M de vistas`;
-  if (n >= 1000) return `${Math.round(n / 1000)} mil vistas`;
-  return `${n} vistas`;
-}
-
 /**
  * Lista horizontal deslizable de vídeos tutoriales. Cada tarjeta muestra la miniatura y solo
  * carga el reproductor de YouTube al tocarla, para que la página no cargue muchos vídeos a la vez.
@@ -123,19 +116,9 @@ export function VideoCarousel({
               <Text style={styles.title} numberOfLines={2}>
                 {v.title}
               </Text>
-              {v.channel ? (
-                <Text style={styles.channel} numberOfLines={1}>
-                  {v.channel}
-                </Text>
-              ) : null}
               <Text style={styles.meta}>
-                {[
-                  v.language === 'es' ? 'En español' : 'En inglés',
-                  v.durationSec ? `${Math.max(1, Math.round(v.durationSec / 60))} min` : null,
-                  v.views ? formatViews(v.views) : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
+                {v.language === 'es' ? 'En español' : 'En inglés'}
+                {v.channel ? ` · ${v.channel}` : ''}
               </Text>
             </View>
           </View>
@@ -233,7 +216,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     minHeight: 40,
   },
-  channel: { color: colors.muted, fontSize: 13, fontFamily: fonts.medium, marginTop: 4 },
   meta: { color: colors.faint, fontSize: 13, fontFamily: fonts.regular, marginTop: 4 },
   arrow: {
     width: 40,
