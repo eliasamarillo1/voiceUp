@@ -9,6 +9,7 @@ export function SheetMusic({ musicXml }: { musicXml: string }) {
 
   useEffect(() => {
     let cancelled = false;
+    setError(null);
     (async () => {
       try {
         const { OpenSheetMusicDisplay } = await import('opensheetmusicdisplay');

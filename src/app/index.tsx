@@ -217,7 +217,8 @@ function SongCard({ song }: { song: Song }) {
         </View>
         <View style={styles.techRow}>
           {used.slice(0, 5).map((id) => {
-            const t = techniqueById(id)!;
+            const t = techniqueById(id);
+            if (!t) return null;
             return (
               <View key={id} style={styles.techTag}>
                 <View style={[styles.techDot, { backgroundColor: t.color }]} />

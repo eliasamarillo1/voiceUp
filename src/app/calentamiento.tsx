@@ -25,7 +25,8 @@ export default function WarmupScreen() {
         .map((id) => ({ id, n: song.occurrences.filter((o) => o.techniqueId === id).length }))
         .sort((a, b) => b.n - a.n)
         .slice(0, 3)
-        .map((x) => techniqueById(x.id)!)
+        .map((x) => techniqueById(x.id))
+        .filter((t) => t !== undefined)
     : [];
 
   return (
@@ -68,7 +69,11 @@ export default function WarmupScreen() {
         <GuidedRoutine
           key={routine.id}
           routine={routine}
-          onDone={song ? () => router.replace(`/cancion/${song.id}`) : undefined}
+          onDone={
+            song
+              ? () => (router.canGoBack() ? router.back() : router.replace(`/cancion/${song.id}`))
+              : undefined
+          }
           doneLabel={song ? `Ir a «${song.title}» →` : undefined}
         />
 
@@ -223,7 +228,11 @@ function GuidedRoutine({
               </Text>
             </Pressable>
             <Pressable
-              onPress={() => (index < steps.length - 1 ? goTo(index + 1) : setFinished(true))}
+              onPress={() => {
+                if (index < steps.length - 1) return goTo(index + 1);
+                setRunning(false);
+                setFinished(true);
+              }}
               style={styles.secondary}
               accessibilityRole="button"
             >

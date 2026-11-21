@@ -203,6 +203,17 @@ function LyricsTab({
   onSeek: (t: number) => void;
   onOccurrence: (o: Occurrence) => void;
 }) {
+  // Partir cada verso en palabras solo cuando cambia la canción, no en cada avance del reloj.
+  const tokenized = useMemo(
+    () =>
+      song.lyrics.map((line, i) =>
+        tokenizeLine(
+          line.text,
+          song.occurrences.filter((o) => o.line === i),
+        ),
+      ),
+    [song],
+  );
   let lastSection = '';
   return (
     <View style={{ gap: 4 }}>
@@ -212,10 +223,7 @@ function LyricsTab({
         const sec = song.sections.find((s) => line.start >= s.start && line.start < s.end);
         const showSection = sec && sec.label + sec.start !== lastSection;
         if (sec) lastSection = sec.label + sec.start;
-        const tokens = tokenizeLine(
-          line.text,
-          song.occurrences.filter((o) => o.line === i),
-        );
+        const tokens = tokenized[i];
         return (
           <View key={i}>
             {showSection && (
@@ -237,7 +245,8 @@ function LyricsTab({
                 {tokens.map((tk, j) => {
                   const sp = j < tokens.length - 1 ? ' ' : '';
                   if (!tk.mark) return tk.raw + sp;
-                  const tech = techniqueById(tk.mark.techniqueId)!;
+                  const tech = techniqueById(tk.mark.techniqueId);
+                  if (!tech) return tk.raw + sp;
                   const now = time >= tk.mark.start && time < tk.mark.end;
                   return (
                     <Text key={j}>
@@ -280,7 +289,8 @@ function TechniquesTab({ song, onPlay }: { song: Song; onPlay: (t: number) => vo
   return (
     <View style={{ gap: 14 }}>
       {groups.map(([id, list]) => {
-        const t = techniqueById(id)!;
+        const t = techniqueById(id);
+        if (!t) return null;
         return (
           <Card key={id} style={{ borderLeftWidth: 4, borderLeftColor: t.color }}>
             <Pressable

@@ -6,9 +6,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * En la versión final se sustituye por el tiempo real del reproductor.
  */
 export function usePlaybackClock(duration: number, initial = 0) {
-  const [time, setTime] = useState(initial);
+  const [time, setTimeState] = useState(initial);
   const [playing, setPlaying] = useState(false);
+  // Guardamos el tiempo también en una referencia para calcular el siguiente valor sin
+  // actualizar un estado desde dentro de la actualización de otro.
+  const timeRef = useRef(initial);
   const last = useRef<number | null>(null);
+
+  const setTime = useCallback((t: number) => {
+    timeRef.current = t;
+    setTimeState(t);
+  }, []);
 
   useEffect(() => {
     if (!playing) return;
@@ -17,25 +25,25 @@ export function usePlaybackClock(duration: number, initial = 0) {
       const now = Date.now();
       const dt = (now - (last.current ?? now)) / 1000;
       last.current = now;
-      setTime((t) => {
-        const next = t + dt;
-        if (next >= duration) {
-          setPlaying(false);
-          return duration;
-        }
-        return next;
-      });
+      const next = timeRef.current + dt;
+      if (next >= duration) {
+        setTime(duration);
+        setPlaying(false);
+      } else {
+        setTime(next);
+      }
     }, 100);
     return () => clearInterval(id);
-  }, [playing, duration]);
+  }, [playing, duration, setTime]);
 
-  const seek = useCallback((t: number) => setTime(Math.max(0, Math.min(duration, t))), [duration]);
+  const seek = useCallback(
+    (t: number) => setTime(Math.max(0, Math.min(duration, t))),
+    [duration, setTime],
+  );
   const toggle = useCallback(() => {
-    setPlaying((p) => {
-      if (!p) setTime((t) => (t >= duration ? 0 : t));
-      return !p;
-    });
-  }, [duration]);
+    if (!playing && timeRef.current >= duration) setTime(0);
+    setPlaying(!playing);
+  }, [playing, duration, setTime]);
   const play = useCallback(() => setPlaying(true), []);
 
   return { time, playing, toggle, play, seek };
