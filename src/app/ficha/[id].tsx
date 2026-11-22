@@ -383,15 +383,8 @@ function AiPanel({ state, onRetry }: { state: Load<SongAnalysis>; onRetry: () =>
       <Body>
         Ya tienes la tonalidad y el tempo, calculados escuchando la canción. La estructura y los recursos
         vocales los prepara el análisis automático, que todavía no está conectado. Cuando se active,
-        aparecerán solos en las pestañas de abajo, igual que en las canciones de ejemplo.
+        aparecerán solos en las pestañas de abajo.
       </Body>
-      <Pressable
-        accessibilityRole="link"
-        onPress={() => router.push('/cancion/amazing-grace')}
-        style={({ pressed }) => [styles.exampleBtn, pressed && { transform: [{ scale: 0.97 }] }]}
-      >
-        <Text style={styles.exampleBtnText}>Ver cómo queda en una canción de ejemplo →</Text>
-      </Pressable>
     </Frame>
   );
 }
