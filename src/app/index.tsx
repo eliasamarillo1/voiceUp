@@ -15,8 +15,7 @@ import { techniqueById } from '../data/techniques';
 import { TechniqueExplorer } from '../components/TechniqueExplorer';
 import { CatalogResults } from '../components/CatalogResults';
 import { PopularNow, RecentlyAnalyzed } from '../components/LibrarySections';
-import { CornerOrnament, Fleuron, Frame, SOFT_SHADOW } from '../components/Nouveau';
-import { StainedGlass } from '../components/StainedGlass';
+import { CornerOrnament, Fleuron, Frame, IrisClump, SOFT_SHADOW } from '../components/Nouveau';
 
 import type { Song } from '../data/types';
 import { Card, Page, Pill, SectionTitle } from '../components/ui';
@@ -67,10 +66,24 @@ export default function Home() {
             style={[
               styles.panelInner,
 
-              !wide && { paddingTop: 96, paddingBottom: 96, paddingHorizontal: 26 },
+              !wide && { justifyContent: 'flex-start', paddingTop: 70, paddingBottom: 190 },
             ]}
           >
-            <StainedGlass />
+            <View pointerEvents="none" style={styles.panelCornerL}>
+              <CornerOrnament size={wide ? 90 : 64} />
+            </View>
+            <View pointerEvents="none" style={styles.panelCornerR}>
+              <CornerOrnament size={wide ? 90 : 64} flip />
+            </View>
+            <View pointerEvents="none" style={[styles.clump, { left: 0 }]}>
+              <IrisClump side="left" width={wide ? 230 : 150} />
+            </View>
+            <View pointerEvents="none" style={[styles.clump, { right: 0 }]}>
+              <IrisClump side="right" width={wide ? 230 : 150} />
+            </View>
+            <View style={styles.panelKnot}>
+              <Fleuron size={26} />
+            </View>
             <View style={[styles.heroText, { maxWidth: wide ? 400 : 340 }]}>
               <Text
                 accessibilityRole="header"
@@ -312,9 +325,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingTop: 40,
+    paddingTop: 60,
     paddingBottom: 40,
   },
+  panelCornerL: { position: 'absolute', top: 6, left: 6 },
+  panelCornerR: { position: 'absolute', top: 6, right: 6 },
+  panelKnot: { position: 'absolute', top: 18 },
+  clump: { position: 'absolute', bottom: 0 },
   heroWide: { flexDirection: 'row', gap: 40, justifyContent: 'center', marginTop: 24 },
   heroText: { alignItems: 'center', flexShrink: 1, maxWidth: 520, width: '100%' },
   hero: {
