@@ -17,10 +17,11 @@ PAL = {
     'leaf': ['#3E8A7E', '#47958A', '#367C71'],
     'leafl': ['#79B3A5', '#86BCAF', '#6DA89A'],
     'stem': ['#3A7F73'],
-    'irisl': ['#7F8DDB', '#8996DF', '#7584D4'],
-    'irisd': ['#3D47B0', '#4450B8', '#3842A6'],
+    'irisl': ['#8592DE', '#8E9AE2', '#7B89D8'],
+    'irisd': ['#3A44AE', '#4250BA', '#3640A4'],
     'signal': ['#F4F3FB', '#EEF0FA'],
     'irisv': ['#C3C9F0', '#CBD0F3'],
+    'signal2': ['#E2E5F7', '#DDE1F6'],
     'style': ['#B9C1EE', '#C3CAF1'],
     'bg': ['#E6F0EC', '#EDF1E4', '#E4ECF2', '#F1EEDD', '#EAF0E9', '#E8EDF4'],
     'bgdeep': ['#CFE2DA', '#D7DEEF', '#EADFB9', '#D3E4D6'],
@@ -420,28 +421,30 @@ def splitn(P, angles):
 def iris_flower(seed=0):
     out = []
     rot = lambda P, a, x=0, y=0: affinity.translate(affinity.rotate(P, a, origin=(0, 0)), x, y)
-    # estandartes: dos laterales detrás y uno central grande, ondulados y abombados
-    for a in (-28, 28):
-        hs = splitn(petal(80, 72, .16, 7, .36, seed + a), [0])
-        for k, h in enumerate(hs):
-            out.append((rot(h, a, 0, -36), 'irisl' + ('_l' if (k == 0) == (a < 0) else '_m')))
-    c = petal(94, 84, .16, 8, .34, seed + 1)
-    for h, suf in zip(splitn(c, [-14, 14]), ['_l', '', '_m']):
+    # estandartes: dos laterales detrás y uno central grande, muy rizados (como la referencia)
+    for a in (-30, 30):
+        P = petal(84, 80, .22, 7, .32, seed + a)
+        for k, h in enumerate(splitn(P, [-8, 8])):
+            out.append((rot(h, a, 0, -36), 'irisl' + ['_l', '', '_m'][k if a < 0 else 2 - k]))
+    c = petal(98, 92, .26, 9, .3, seed + 1)
+    for h, suf in zip(splitn(c, [-10, 10]), ['_l', '', '_m']):
         out.append((affinity.translate(h, 0, -34), 'irisl' + suf))
-    # caídas: muy abiertas y colgando, con bordes rizados y vetas blancas
-    for a in (-148, 148, 180):
+    # caídas: anchas, redondas y colgando, con borde rizado; primero las laterales y luego la delantera
+    for a in (-132, 132, 180):
         big = a == 180
-        P = petal(108 if big else 100, 94 if big else 88, .2, 9, .4, seed + a + 5)
-        for k, h in enumerate(splitn(P, [0])):
-            light = (k == 0) if a <= 0 else (k == 1)
-            out.append((rot(h, a, 0, -30), 'irisd' + ('_l' if light and not big else ('_m' if not light else ''))))
-        for q, key in fan(64 if big else 58, 20, 5, 6):
-            out.append((rot(q.intersection(P.buffer(-6)), a, 0, -30), key))
+        P = petal(112 if big else 104, 90 if big else 96, .24, 10, .34, seed + a + 5)
+        for k, h in enumerate(splitn(P, [-20, 20])):
+            # el centro más oscuro y los lados más claros, como en la referencia
+            out.append((rot(h, a, 0, -30), 'irisd' + ('_m' if k == 1 else '_l' if (k == 0) == (a <= 0) else '')))
+        # mancha blanca con vetas en la base del pétalo; el plomo dibuja las vetas
+        patch = petal(74 if big else 68, 42 if big else 38, 0, 1, .6, seed).intersection(P.buffer(-9))
+        for k, q in enumerate(splitn(patch, [-14, -5, 5, 14])):
+            out.append((rot(q, a, 0, -30), 'signal' if k % 2 == 0 else 'signal2'))
     # brazos del estilo (pétalos pequeños claros en el centro) y barbas amarillas
-    for a in (-148, 148, 180):
-        out.append((rot(petal(36, 24, .08, 5, .55, seed + a), a, 0, -30), 'style'))
-    for a in (-148, 148, 180):
-        out.append((rot(lens(26, 6, 22), a, 0, -30), 'amber'))
+    for a in (-132, 132, 180):
+        out.append((rot(petal(30, 24, .1, 5, .55, seed + a), a, 0, -30), 'style'))
+    for a in (-132, 132, 180):
+        out.append((rot(lens(26, 7, 18), a, 0, -30), 'amber'))
     return out
 
 

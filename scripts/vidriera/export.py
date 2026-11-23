@@ -42,7 +42,7 @@ mob_fl = [
     ('iris', 179, mf - 40, .42, 0, [(179, mf), (179, mf - 40)], 4),
 ]
 MWIN = (40, 150, MW_ - 40, MH - 112)
-mob = hero_svg(MW_, MH, MWIN, mob_fl, 34, 5, 'vm', 15, 3.4)
+mob = hero_svg(MW_, MH, MWIN, mob_fl, 34, 5, 'vm', 15, 2.8)
 
 import re
 fix = lambda x: re.sub(r'^<svg xmlns="http://www.w3.org/2000/svg" width="\d+" height="\d+"', '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"', x)
