@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
   type ScrollViewInstance,
+  useWindowDimensions,
 } from 'react-native';
 import { router } from 'expo-router';
 import { searchSongs } from '../data/songs';
@@ -28,6 +29,7 @@ export default function Home() {
   const results = useMemo(() => searchSongs(query, filter), [query, filter]);
   const scrollRef = useRef<ScrollViewInstance>(null);
   const [libraryY, setLibraryY] = useState(0);
+  const narrow = useWindowDimensions().width < 430;
   const goToResults = () => scrollRef.current?.scrollTo({ y: libraryY, animated: true });
   const showSongsWith = (id: string) => {
     setFilter(id);
@@ -38,16 +40,16 @@ export default function Home() {
     <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: 96 }}>
       <Page>
         <View style={styles.header}>
-          <Text style={styles.logo}>VoiceUp</Text>
-          <View style={styles.nav}>
+          <Text style={[styles.logo, narrow && { fontSize: 24 }]}>VoiceUp</Text>
+          <View style={[styles.nav, narrow && { gap: 8 }]}>
             <Pressable onPress={() => router.push('/calentamiento')} accessibilityRole="link">
-              <Text style={styles.headerLink}>Calentar</Text>
+              <Text style={[styles.headerLink, narrow && { fontSize: 15 }]}>Calentar</Text>
             </Pressable>
             <Pressable onPress={() => router.push('/recursos')} accessibilityRole="link">
-              <Text style={styles.headerLink}>Recursos</Text>
+              <Text style={[styles.headerLink, narrow && { fontSize: 15 }]}>Recursos</Text>
             </Pressable>
             <Pressable onPress={() => router.push('/piano')} accessibilityRole="link">
-              <Text style={styles.headerLink}>Piano</Text>
+              <Text style={[styles.headerLink, narrow && { fontSize: 15 }]}>Piano</Text>
             </Pressable>
           </View>
         </View>
