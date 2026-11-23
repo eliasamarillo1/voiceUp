@@ -6,7 +6,6 @@ import {
   Text,
   TextInput,
   View,
-  useWindowDimensions,
   type ScrollViewInstance,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -15,7 +14,8 @@ import { techniqueById } from '../data/techniques';
 import { TechniqueExplorer } from '../components/TechniqueExplorer';
 import { CatalogResults } from '../components/CatalogResults';
 import { PopularNow, RecentlyAnalyzed } from '../components/LibrarySections';
-import { CornerOrnament, Fleuron, Frame, IrisClump, SOFT_SHADOW } from '../components/Nouveau';
+import { Fleuron, SOFT_SHADOW } from '../components/Nouveau';
+import { StainedGlassHero } from '../components/StainedGlassHero';
 
 import type { Song } from '../data/types';
 import { Card, Page, Pill, SectionTitle } from '../components/ui';
@@ -27,7 +27,7 @@ export default function Home() {
   const results = useMemo(() => searchSongs(query, filter), [query, filter]);
   const scrollRef = useRef<ScrollViewInstance>(null);
   const [libraryY, setLibraryY] = useState(0);
-  const wide = useWindowDimensions().width >= 760;
+  const goToResults = () => scrollRef.current?.scrollTo({ y: libraryY, animated: true });
   const showSongsWith = (id: string) => {
     setFilter(id);
     scrollRef.current?.scrollTo({ y: libraryY, animated: true });
@@ -35,12 +35,6 @@ export default function Home() {
 
   return (
     <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: 96 }}>
-      <View pointerEvents="none" style={styles.cornerL}>
-        <CornerOrnament size={wide ? 120 : 64} />
-      </View>
-      <View pointerEvents="none" style={styles.cornerR}>
-        <CornerOrnament size={wide ? 120 : 64} flip />
-      </View>
       <Page>
         <View style={styles.header}>
           <Text style={styles.logo}>VoiceUp</Text>
@@ -54,44 +48,23 @@ export default function Home() {
           </View>
         </View>
 
-        <View
-          style={[
-            styles.panel,
-            {
-              minHeight: wide ? 440 : 600,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.panelInner,
-
-              !wide && { justifyContent: 'flex-start', paddingTop: 70, paddingBottom: 190 },
-            ]}
-          >
-            <View pointerEvents="none" style={styles.panelCornerL}>
-              <CornerOrnament size={wide ? 90 : 64} />
-            </View>
-            <View pointerEvents="none" style={styles.panelCornerR}>
-              <CornerOrnament size={wide ? 90 : 64} flip />
-            </View>
-            <View pointerEvents="none" style={[styles.clump, { left: 0 }]}>
-              <IrisClump side="left" width={wide ? 230 : 150} />
-            </View>
-            <View pointerEvents="none" style={[styles.clump, { right: 0 }]}>
-              <IrisClump side="right" width={wide ? 230 : 150} />
-            </View>
-            <View style={styles.panelKnot}>
-              <Fleuron size={26} />
-            </View>
-            <View style={[styles.heroText, { maxWidth: wide ? 400 : 340 }]}>
+        <StainedGlassHero>
+          {(wide, pane) => (
+            <>
               <Text
                 accessibilityRole="header"
-                style={[styles.hero, wide && { fontSize: 44, lineHeight: 50 }]}
+                style={[
+                  styles.hero,
+                  wide && pane >= 340
+                    ? { fontSize: 44, lineHeight: 48 }
+                    : wide
+                      ? { fontSize: 36, lineHeight: 40 }
+                      : { fontSize: 30, lineHeight: 34 },
+                ]}
               >
                 ¿Qué quieres cantar hoy?
               </Text>
-              <Text style={styles.heroSub}>
+              <Text style={[styles.heroSub, !wide && { fontSize: 15, lineHeight: 21 }]}>
                 Busca una canción para ver cómo está hecha, o aprende a entrenar cada recurso vocal.
               </Text>
               <View style={styles.searchBox}>
@@ -99,18 +72,24 @@ export default function Home() {
                 <TextInput
                   value={query}
                   onChangeText={setQuery}
-                  placeholder={
-                    wide ? 'Canción, artista o un trozo de la letra' : 'Canción, artista o letra'
-                  }
+                  onSubmitEditing={goToResults}
+                  placeholder={pane >= 340 ? 'Canción o artista' : 'Canción'}
                   placeholderTextColor={colors.faint}
-                  style={styles.input}
+                  style={[styles.input, !wide && { fontSize: 15 }]}
                   autoCorrect={false}
                   accessibilityLabel="Buscar canción"
                 />
+                <Pressable
+                  onPress={goToResults}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.searchButton, pressed && { opacity: 0.85 }]}
+                >
+                  <Text style={styles.searchButtonText}>Buscar</Text>
+                </Pressable>
               </View>
-            </View>
-          </View>
-        </View>
+            </>
+          )}
+        </StainedGlassHero>
 
         <View style={styles.doors}>
           <Door
@@ -158,43 +137,44 @@ export default function Home() {
             <SectionTitle hint="Tres canciones de dominio público analizadas a mano, para ver cómo es un análisis completo">
               Prueba un ejemplo
             </SectionTitle>
-        {filter && (
-          <View style={styles.activeFilter}>
-            <View style={[styles.techDot, { backgroundColor: techniqueById(filter)?.color }]} />
-            <Text style={styles.activeFilterText}>
-              Canciones con {techniqueById(filter)?.name.toLowerCase()}
-            </Text>
-            <Pressable onPress={() => setFilter(undefined)} accessibilityRole="button">
-              <Text style={styles.toggle}>✕ Quitar</Text>
-            </Pressable>
-          </View>
-        )}
+            {filter && (
+              <View style={styles.activeFilter}>
+                <View style={[styles.techDot, { backgroundColor: techniqueById(filter)?.color }]} />
+                <Text style={styles.activeFilterText}>
+                  Canciones con {techniqueById(filter)?.name.toLowerCase()}
+                </Text>
+                <Pressable onPress={() => setFilter(undefined)} accessibilityRole="button">
+                  <Text style={styles.toggle}>✕ Quitar</Text>
+                </Pressable>
+              </View>
+            )}
 
             <View style={styles.examples}>
               {results.map((s) => (
                 <ExampleCard key={s.id} song={s} />
               ))}
             </View>
-        {results.length === 0 && filter && !query && (
-          <Card style={{ gap: 12 }}>
-            <Text style={styles.emptyTitle}>
-              Aún no hay canciones de ejemplo con {techniqueById(filter)?.name.toLowerCase()}
-            </Text>
-            <Text style={styles.emptyText}>
-              Cuando el análisis automático esté listo, aquí aparecerán todas las canciones que lo
-              usan. Mientras tanto, puedes aprender qué es y cómo practicarlo.
-            </Text>
-            <View style={styles.row}>
-              <Pill
-                label={`Ver ${techniqueById(filter)?.name} →`}
-                active
-                color={techniqueById(filter)?.color}
-                onPress={() => router.push({ pathname: '/recurso/[id]', params: { id: filter } })}
-              />
-            </View>
-          </Card>
-        )}
-
+            {results.length === 0 && filter && !query && (
+              <Card style={{ gap: 12 }}>
+                <Text style={styles.emptyTitle}>
+                  Aún no hay canciones de ejemplo con {techniqueById(filter)?.name.toLowerCase()}
+                </Text>
+                <Text style={styles.emptyText}>
+                  Cuando el análisis automático esté listo, aquí aparecerán todas las canciones que
+                  lo usan. Mientras tanto, puedes aprender qué es y cómo practicarlo.
+                </Text>
+                <View style={styles.row}>
+                  <Pill
+                    label={`Ver ${techniqueById(filter)?.name} →`}
+                    active
+                    color={techniqueById(filter)?.color}
+                    onPress={() =>
+                      router.push({ pathname: '/recurso/[id]', params: { id: filter } })
+                    }
+                  />
+                </View>
+              </Card>
+            )}
           </>
         )}
 
@@ -266,7 +246,13 @@ function ExampleCard({ song }: { song: Song }) {
 }
 
 const styles = StyleSheet.create({
-  subhead: { color: colors.frameDark, fontSize: 18, fontFamily: fonts.heavy, marginTop: 24, marginBottom: 10 },
+  subhead: {
+    color: colors.frameDark,
+    fontSize: 18,
+    fontFamily: fonts.heavy,
+    marginTop: 24,
+    marginBottom: 10,
+  },
   examples: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   example: {
     flexGrow: 1,
@@ -358,12 +344,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1.5,
     borderColor: colors.gold,
-    paddingHorizontal: 20,
-    marginTop: 22,
-    shadowColor: colors.frame,
-    shadowOpacity: 0.18,
-    shadowRadius: 0,
-    shadowOffset: { width: 0, height: 4 },
+    paddingLeft: 16,
+    paddingRight: 5,
+    marginTop: 20,
+    maxWidth: 400,
+    boxShadow: '0 4px 14px rgba(35,33,58,.08)',
   },
   searchIcon: { color: colors.frameDark, fontSize: 22, fontFamily: fonts.regular, marginRight: 10 },
   input: {
@@ -371,9 +356,18 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 17,
     fontFamily: fonts.medium,
-    paddingVertical: 15,
+    paddingVertical: 13,
+    minWidth: 0,
     outlineStyle: 'none',
   } as never,
+  searchButton: {
+    backgroundColor: colors.frame,
+    borderRadius: radius.pill,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    marginLeft: 6,
+  },
+  searchButtonText: { color: '#fff', fontSize: 14, fontFamily: fonts.bold },
   doors: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 32 },
   door: {
     flexGrow: 1,
