@@ -192,7 +192,7 @@ def sky(t, rnd, stops=SKY_DAY):
     return c
 
 
-def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12, stops=SKY_DAY, extra=()):
+def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12, stops=SKY_DAY, extra=(), dyn=False):
     """window: (x0,y0,x1,y1) cristal crema para el texto. flowers: lista de (kind, x, y, scale, rot, colors)."""
     rnd = random.Random(seed)
     pieces = []  # (polygon, colorkey)
@@ -287,7 +287,11 @@ def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12, stop
     for c in vor:
         g = c.intersection(bg)
         for q in polys(g):
-            bgp.append((q, sky(q.centroid.y / H, rnd, stops)))
+            if dyn:
+                j = rnd.uniform(-.07, .02) if rnd.random() < .3 else rnd.uniform(-.02, .05)
+                bgp.append((q, f'sky:{j:.3f}'))
+            else:
+                bgp.append((q, sky(q.centroid.y / H, rnd, stops)))
     bgp = merge_slivers(bgp, 260)
     for e, key in extra:
         e = e.difference(taken)
@@ -298,7 +302,7 @@ def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12, stop
     return pieces
 
 
-def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=(), glow=('#FFF6D8', '#FCE9B8')):
+def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=(), glow=('#FFF6D8', '#FCE9B8'), dyn=False, win=None, stars=()):
     rnd = random.Random(seed)
     defs = [f'''<filter id="{uid}tex" x="0" y="0" width="100%" height="100%">
 <feTurbulence type="fractalNoise" baseFrequency="0.035 0.06" numOctaves="2" seed="4"/>
@@ -313,12 +317,22 @@ def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=(), glow=('#FFF6D8', '#FC
 <feColorMatrix in="m" values="0 0 0 0 .1  0 0 0 0 .04  0 0 0 0 .3  0 0 0 1.4 -.62" result="d"/>
 <feComposite in="d" in2="SourceAlpha" operator="in" result="ds"/>
 <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="ds"/><feMergeNode in="ws"/></feMerge></filter>''']
-    defs.append(f'<radialGradient id="{uid}glow"><stop offset="0" stop-color="{glow[0]}" stop-opacity=".9"/>'
-                f'<stop offset=".5" stop-color="{glow[1]}" stop-opacity=".4"/><stop offset="1" stop-color="{glow[1]}" stop-opacity="0"/></radialGradient>')
+    if dyn:
+        # la luz (cielo, sol, halo, noche y estrellas) la pone la app según la hora: %%LIGHT%%
+        import re as _re
+        defs[0] = _re.sub(r'<radialGradient id="' + uid + r'light".*?</radialGradient>', '', defs[0], flags=_re.S)
+        defs.append('%%LIGHT%%')
+    else:
+        defs.append(f'<radialGradient id="{uid}glow"><stop offset="0" stop-color="{glow[0]}" stop-opacity=".9"/>'
+                      f'<stop offset=".5" stop-color="{glow[1]}" stop-opacity=".4"/><stop offset="1" stop-color="{glow[1]}" stop-opacity="0"/></radialGradient>')
     FLOWER = ('irisl', 'irisd', 'signal', 'signal2', 'style', 'amber', 'leaf', 'leafl', 'stem')
     grads = {}
 
+    skyover = []
+
     def fill(key):
+        if key.startswith('sky:'):
+            return f'url(#{uid}sky)'
         k = key.replace('_m', '').replace('_l', '')
         base = k if k.startswith('#') else rnd.choice(PAL[k])
         if key.endswith('_m'):  # pétalo central algo más oscuro
@@ -356,16 +370,24 @@ def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=(), glow=('#FFF6D8', '#FC
         shapes.append(f'<path id="{uid}{n}" d="{d}"/>')
         k0 = key.replace('_m', '').replace('_l', '')
         (fbody if k0 in FLOWER else body).append(f'<use href="#{uid}{n}" fill="{fill(key)}"/>')
+        if key.startswith('sky:'):
+            j = float(key[4:])
+            if abs(j) > .004:
+                skyover.append(f'<use href="#{uid}{n}" fill="{"#fff" if j > 0 else "#000"}" fill-opacity="{abs(j) * (1 if j > 0 else .8):.3f}"/>')
         ids.append(f'{uid}{n}')
     defs.append(''.join(shapes))
     leads = ''.join(f'<use href="#{i}"/>' for i in ids)
     s = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">'
          f'<defs>{"".join(defs)}{"".join(grads.values())}</defs>'
          + ''.join(body)
+         + ''.join(skyover)
+         + (f'<g fill="url(#{uid}starf)" stroke="url(#{uid}starl)" stroke-width="{lead * .7:.1f}" stroke-linejoin="round">'
+            + ''.join(f'<path d="{path_d(st)}"/>' for st in stars) + '</g>' if stars else '')
          + ''.join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="url(#{uid}glow)"/>' for x, y, r in glows)
          + f'<g filter="url(#{uid}opal)">{"".join(fbody)}</g>'
          + f'<rect width="{W}" height="{H}" filter="url(#{uid}tex)" opacity=".18"/>'
          + f'<rect width="{W}" height="{H}" fill="url(#{uid}light)"/>'
+         + (f'<path fill-rule="evenodd" fill="url(#{uid}night)" d="M0 0H{W}V{H}H0Z M{win[0]} {win[1]}V{win[3]}H{win[2]}V{win[1]}Z"/>' if dyn else '')
          + f'<g fill="none" stroke="{LEAD}" stroke-width="{lead}" stroke-linejoin="round">{leads}</g>'
          + f'<g fill="none" stroke="#8A8792" stroke-opacity=".55" stroke-width="{lead*.25:.2f}" stroke-linejoin="round" transform="translate(-.4,-.4)">{leads}</g>'
          + f'<rect x="1.5" y="1.5" width="{W-3}" height="{H-3}" fill="none" stroke="{LEAD}" stroke-width="3"/>'

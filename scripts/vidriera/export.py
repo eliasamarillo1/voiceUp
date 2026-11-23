@@ -1,70 +1,74 @@
-import sys, json
-sys.path.insert(0, '.')
+"""Genera src/components/stainedGlassArt.ts: la vidriera de lirios sin luz fija.
+
+El cielo, el sol, el halo, la noche y las estrellas se definen en la app
+(src/components/glassLight.ts) según la hora del visitante; aquí se deja el
+marcador %%LIGHT%% dentro de <defs>.
+
+    pip install shapely numpy
+    python3 scripts/vidriera/export.py
+"""
+import os, sys, json, re
+sys.path.insert(0, os.path.dirname(__file__))
 from glass import build, svg
-from glass import build, svg
+from variants import side, stars
+
+OUT = os.path.join(os.path.dirname(__file__), '../../src/components/stainedGlassArt.ts')
 
 
-def hero_svg(W, H, window, flowers, cells, seed, uid, border, lead, glows=()):
-    return svg(W, H, build(W, H, window, flowers, border=border, cells=cells, seed=seed, rw=6, fw=12 if W > 700 else 9), uid=uid, lead=lead, glows=glows)
+def fix(x):
+    return re.sub(r'^<svg xmlns="http://www.w3.org/2000/svg" width="\d+" height="\d+"',
+                  '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"', x)
 
-K = 0.82  # escala horizontal de los laterales para el ancho real de la app (888 px)
+
+def wide():
+    W, H = 888, 560
+    floor = H - 22
+    win = (280, 46, W - 280, H - 46)
+    fl = side(W, H, False, floor, 1) + side(W, H, True, floor, 7)
+    p = build(W, H, win, fl, border=22, cells=56, seed=3, rw=6, fw=12, dyn=True)
+    st = [g for g, _ in stars(W, H, 12, [win, (22, 120, 270, 560), (W - 270, 120, W - 22, 560)], 4, 8, 13)]
+    g = svg(W, H, p, uid='va', lead=4.0, glows=[(138, 170, 210), (W - 138, 170, 210)], dyn=True, win=win, stars=st)
+    return 'va', W, H, win, g
 
 
-def side(W, H, mirror, floor, sd, k=K):
-    m = (lambda x: W - x * k) if mirror else (lambda x: x * k)
-    r = -1 if mirror else 1
-    fs = 0.9
-    return [
-        ('sword', m(120), floor, 310, 19, .12 * r, -6 * r), ('sword', m(150), floor, 280, 17, -.18 * r, 12 * r),
-        ('sword', m(95), floor, 235, 16, .3 * r, -20 * r), ('sword', m(200), floor, 205, 15, -.25 * r, 22 * r),
-        ('sword', m(60), floor, 160, 14, .35 * r, -28 * r), ('sword', m(250), floor, 140, 13, -.3 * r, 30 * r),
-        ('irisbud', m(56), 290, .95, -12 * r, [(m(76), floor), (m(62), 360), (m(56), 290)]),
-        ('iris', m(232), 338, .74, 8 * r, [(m(218), floor), (m(224), 400), (m(232), 338)], sd + 3),
-        ('iris', m(138), 196, 1.02, -4 * r, [(m(130), floor), (m(128), 340), (m(138), 196)], sd),
+def narrow():
+    W, H = 358, 660
+    f = H - 15
+    win = (34, 206, W - 34, H - 132)
+    fl = [
+        ('sword', 50, 206, 150, 13, .3, -24), ('sword', W - 50, 206, 150, 13, -.3, 24),
+        ('sword', 150, 206, 110, 11, .2, -12), ('sword', W - 150, 206, 110, 11, -.2, 12),
+        ('irisbud', 179, 84, 1.0, 0, [(179, 206), (179, 84)]),
+        ('iris', 94, 132, .82, -6, [(94, 206), (94, 132)], 1),
+        ('iris', W - 94, 132, .82, 6, [(W - 94, 206), (W - 94, 132)], 7),
+        ('sword', 30, f, 110, 12, .3, -30), ('sword', 120, f, 90, 11, .2, -12),
+        ('sword', W - 30, f, 110, 12, -.3, 30), ('sword', W - 120, f, 90, 11, -.2, 12),
+        ('iris', 66, f - 44, .5, -8, [(66, f), (66, f - 44)], 2),
+        ('iris', W - 66, f - 44, .5, 8, [(W - 66, f), (W - 66, f - 44)], 8),
+        ('iris', 179, f - 50, .58, 0, [(179, f), (179, f - 50)], 4),
     ]
+    p = build(W, H, win, fl, border=15, cells=40, seed=5, rw=6, fw=9, dyn=True)
+    st = [g for g, _ in stars(W, H, 5, [win, (20, 40, 160, 206), (W - 160, 40, W - 20, 206), (150, 50, 210, 206)], 4, 6, 9)]
+    g = svg(W, H, p, uid='vn', lead=2.8, glows=[(94, 100, 110), (W - 94, 100, 110), (179, f - 70, 90)], dyn=True, win=win, stars=st)
+    return 'vn', W, H, win, g
 
 
-W, H = 888, 480
-floor = H - 22
-DW = (252, 42, W - 252, H - 42)
-desk = hero_svg(W, H, DW, side(W, H, False, floor, 1) + side(W, H, True, floor, 7), 50, 3, 'vd', 22, 4.0, [(113, 170, 170), (W - 113, 170, 170)])
-
-MW_, MH = 358, 600
-mf = MH - 15
-mob_fl = [
-    ('sword', 60, 150, 120, 12, .3, -30), ('sword', MW_ - 60, 150, 120, 12, -.3, 30),
-    ('iris', 84, 92, .55, -6, [(84, 150), (84, 92)], 1),
-    ('iris', MW_ - 84, 92, .55, 6, [(MW_ - 84, 150), (MW_ - 84, 92)], 7),
-    ('irisbud', 179, 70, .9, 0, [(179, 150), (179, 70)]),
-    ('sword', 40, mf, 90, 12, .3, -35), ('sword', 70, mf, 80, 11, .2, -10),
-    ('sword', MW_ - 40, mf, 90, 12, -.3, 35), ('sword', MW_ - 70, mf, 80, 11, -.2, 10),
-    ('sword', 150, mf, 70, 10, .2, -20), ('sword', MW_ - 150, mf, 70, 10, -.2, 20),
-    ('iris', 179, mf - 40, .42, 0, [(179, mf), (179, mf - 40)], 4),
-]
-MWIN = (40, 150, MW_ - 40, MH - 112)
-mob = hero_svg(MW_, MH, MWIN, mob_fl, 34, 5, 'vm', 15, 2.8, [(84, 66, 80), (MW_ - 84, 66, 80), (179, mf - 70, 70)])
-
-import re
-fix = lambda x: re.sub(r'^<svg xmlns="http://www.w3.org/2000/svg" width="\d+" height="\d+"', '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"', x)
-desk, mob = fix(desk), fix(mob)
-ts = f'''// Generado por el script de la vidriera (glass.py). No editar a mano.
-// Vidriera de lirios: piezas de cristal con plomo, cielo arriba y prado abajo.
-
-/** Composición ancha: tamaño de diseño y hueco de cristal crema para el texto. */
-export const GLASS_WIDE = {{
+def block(name, doc, a):
+    uid, W, H, w, g = a
+    return f'''/** {doc} */
+export const {name} = {{
+  uid: '{uid}',
   width: {W},
   height: {H},
-  window: {{ x0: {DW[0]}, y0: {DW[1]}, x1: {DW[2]}, y1: {DW[3]} }},
-  svg: {json.dumps(desk)},
-}};
-
-/** Composición de móvil (vertical). */
-export const GLASS_NARROW = {{
-  width: {MW_},
-  height: {MH},
-  window: {{ x0: {MWIN[0]}, y0: {MWIN[1]}, x1: {MWIN[2]}, y1: {MWIN[3]} }},
-  svg: {json.dumps(mob)},
+  window: {{ x0: {w[0]}, y0: {w[1]}, x1: {w[2]}, y1: {w[3]} }},
+  svg: {json.dumps(fix(g))},
 }};
 '''
-open(__import__('os').path.join(__import__('os').path.dirname(__file__), '../../src/components/stainedGlassArt.ts'), 'w').write(ts)
+
+
+ts = ('// Generado por scripts/vidriera/export.py. No editar a mano.\n'
+      '// Vidriera de lirios: piezas de cristal con plomo. La luz la añade glassLight.ts.\n\n'
+      + block('GLASS_WIDE', 'Composición ancha: tamaño de diseño y hueco de cristal crema para el texto.', wide()) + '\n'
+      + block('GLASS_NARROW', 'Composición de móvil (vertical).', narrow()))
+open(OUT, 'w').write(ts)
 print(len(ts))

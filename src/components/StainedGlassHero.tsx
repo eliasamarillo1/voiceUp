@@ -1,7 +1,8 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GlassArt } from './GlassArt';
 import { GLASS_NARROW, GLASS_WIDE } from './stainedGlassArt';
+import { currentHour, lightDefs } from './glassLight';
 
 /** Ancho mínimo del contenedor para usar la vidriera apaisada. */
 const WIDE_FROM = 760;
@@ -18,9 +19,19 @@ export function StainedGlassHero({
   children: (wide: boolean, paneWidth: number) => ReactNode;
 }) {
   const [w, setW] = useState(0);
+  // la luz sigue la hora local, como una cristalera de verdad; se actualiza cada minuto
+  const [hour, setHour] = useState(currentHour);
+  useEffect(() => {
+    const id = setInterval(() => setHour(currentHour()), 60_000);
+    return () => clearInterval(id);
+  }, []);
   const wide = w >= WIDE_FROM;
   const art = wide ? GLASS_WIDE : GLASS_NARROW;
   const width = wide ? w : Math.min(w, NARROW_MAX);
+  const lit = useMemo(
+    () => art.svg.replace('%%LIGHT%%', lightDefs(art.uid, art.height, hour)),
+    [art, hour],
+  );
   const scale = width / art.width;
   const { x0, y0, x1, y1 } = art.window;
   // el cristal del texto tiene un marco dorado de 12 px (9 en móvil) que hay que respetar
@@ -30,7 +41,7 @@ export function StainedGlassHero({
     <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={styles.outer}>
       {w > 0 && (
         <View style={[styles.glass, { width, height: art.height * scale }]}>
-          <GlassArt svg={art.svg} />
+          <GlassArt svg={lit} />
           <View
             style={[
               styles.pane,
