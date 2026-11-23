@@ -181,8 +181,10 @@ def mix(a, b, t):
     return '#' + ''.join(f'{int(x + (y - x) * t):02X}' for x, y in zip(pa, pb))
 
 
-def sky(t, rnd):
-    stops = [(0, '#C4D4F0'), (.3, '#D9DDF4'), (.55, '#F4ECD2'), (.72, '#D6E9CF'), (1, '#B9D8BE')]
+SKY_DAY = [(0, '#C4D4F0'), (.3, '#D9DDF4'), (.55, '#F4ECD2'), (.72, '#D6E9CF'), (1, '#B9D8BE')]
+
+
+def sky(t, rnd, stops=SKY_DAY):
     for (t0, c0), (t1, c1) in zip(stops, stops[1:]):
         if t <= t1:
             c = mix(c0, c1, (t - t0) / (t1 - t0)); break
@@ -190,7 +192,7 @@ def sky(t, rnd):
     return c
 
 
-def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12):
+def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12, stops=SKY_DAY, extra=()):
     """window: (x0,y0,x1,y1) cristal crema para el texto. flowers: lista de (kind, x, y, scale, rot, colors)."""
     rnd = random.Random(seed)
     pieces = []  # (polygon, colorkey)
@@ -285,15 +287,18 @@ def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12):
     for c in vor:
         g = c.intersection(bg)
         for q in polys(g):
-            bgp.append((q, sky(q.centroid.y / H, rnd)))
+            bgp.append((q, sky(q.centroid.y / H, rnd, stops)))
     bgp = merge_slivers(bgp, 260)
+    for e, key in extra:
+        e = e.difference(taken)
+        bgp = [(make_valid(q).buffer(0).difference(e), c) for q, c in bgp] + [(e, key)]
     pieces += bgp + final_fl
     pieces += wband
     pieces.append((wcore, 'cream'))
     return pieces
 
 
-def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=()):
+def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=(), glow=('#FFF6D8', '#FCE9B8')):
     rnd = random.Random(seed)
     defs = [f'''<filter id="{uid}tex" x="0" y="0" width="100%" height="100%">
 <feTurbulence type="fractalNoise" baseFrequency="0.035 0.06" numOctaves="2" seed="4"/>
@@ -308,8 +313,8 @@ def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=()):
 <feColorMatrix in="m" values="0 0 0 0 .1  0 0 0 0 .04  0 0 0 0 .3  0 0 0 1.4 -.62" result="d"/>
 <feComposite in="d" in2="SourceAlpha" operator="in" result="ds"/>
 <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="ds"/><feMergeNode in="ws"/></feMerge></filter>''']
-    defs.append(f'<radialGradient id="{uid}glow"><stop offset="0" stop-color="#FFF6D8" stop-opacity=".85"/>'
-                f'<stop offset=".5" stop-color="#FCE9B8" stop-opacity=".35"/><stop offset="1" stop-color="#FCE9B8" stop-opacity="0"/></radialGradient>')
+    defs.append(f'<radialGradient id="{uid}glow"><stop offset="0" stop-color="{glow[0]}" stop-opacity=".9"/>'
+                f'<stop offset=".5" stop-color="{glow[1]}" stop-opacity=".4"/><stop offset="1" stop-color="{glow[1]}" stop-opacity="0"/></radialGradient>')
     FLOWER = ('irisl', 'irisd', 'signal', 'signal2', 'style', 'amber', 'leaf', 'leafl', 'stem')
     grads = {}
 

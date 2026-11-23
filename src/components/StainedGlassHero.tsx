@@ -4,7 +4,7 @@ import { GlassArt } from './GlassArt';
 import { GLASS_NARROW, GLASS_WIDE } from './stainedGlassArt';
 
 /** Ancho mínimo del contenedor para usar la vidriera apaisada. */
-const WIDE_FROM = 700;
+const WIDE_FROM = 760;
 /** La versión vertical no crece más de esto, para que no se haga enorme. */
 const NARROW_MAX = 440;
 
@@ -39,7 +39,7 @@ export function StainedGlassHero({
                 top: y0 * scale + inset,
                 width: (x1 - x0) * scale - inset * 2,
                 height: (y1 - y0) * scale - inset * 2,
-                paddingHorizontal: wide ? 24 : 14,
+                paddingHorizontal: wide && (x1 - x0) * scale > 320 ? 24 : 12,
               },
             ]}
           >

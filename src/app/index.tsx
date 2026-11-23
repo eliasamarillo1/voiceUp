@@ -55,16 +55,16 @@ export default function Home() {
                 accessibilityRole="header"
                 style={[
                   styles.hero,
-                  wide && pane >= 340
+                  pane >= 340
                     ? { fontSize: 44, lineHeight: 48 }
-                    : wide
-                      ? { fontSize: 36, lineHeight: 40 }
-                      : { fontSize: 30, lineHeight: 34 },
+                    : pane >= 260
+                      ? { fontSize: 34, lineHeight: 38 }
+                      : { fontSize: 29, lineHeight: 33 },
                 ]}
               >
                 ¿Qué quieres cantar hoy?
               </Text>
-              <Text style={[styles.heroSub, !wide && { fontSize: 15, lineHeight: 21 }]}>
+              <Text style={[styles.heroSub, pane < 340 && { fontSize: 15, lineHeight: 21 }]}>
                 Busca una canción para ver cómo está hecha, o aprende a entrenar cada recurso vocal.
               </Text>
               <View style={styles.searchBox}>
