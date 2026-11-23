@@ -16,6 +16,7 @@ import { CatalogResults } from '../components/CatalogResults';
 import { PopularNow, RecentlyAnalyzed } from '../components/LibrarySections';
 import { Fleuron, SOFT_SHADOW } from '../components/Nouveau';
 import { StainedGlassHero } from '../components/StainedGlassHero';
+import { PixelTitle } from '../components/PixelTitle';
 
 import type { Song } from '../data/types';
 import { Card, Page, Pill, SectionTitle } from '../components/ui';
@@ -51,19 +52,10 @@ export default function Home() {
         <StainedGlassHero>
           {(wide, pane) => (
             <>
-              <Text
-                accessibilityRole="header"
-                style={[
-                  styles.hero,
-                  pane >= 500
-                    ? { fontSize: 46, lineHeight: 50 }
-                    : pane >= 320
-                      ? { fontSize: 36, lineHeight: 40 }
-                      : { fontSize: 29, lineHeight: 33 },
-                ]}
-              >
-                ¿Qué quieres cantar hoy?
-              </Text>
+              <PixelTitle
+                text="¿Qué quieres cantar hoy?"
+                maxSize={pane >= 500 ? 64 : pane >= 320 ? 40 : 32}
+              />
               <Text style={[styles.heroSub, pane < 320 && { fontSize: 15, lineHeight: 21 }]}>
                 Busca una canción para ver cómo está hecha, o aprende a entrenar cada recurso vocal.
               </Text>
