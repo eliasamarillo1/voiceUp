@@ -216,15 +216,19 @@ def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12, stop
         cx, cy = c.centroid.x, c.centroid.y
         pieces.append((Point(cx, cy).buffer(border * .26, 20), 'jewel'))
     # cristal central (ventana del texto)
-    x0, y0, x1, y1 = window
-    win = box(x0, y0, x1, y1).buffer(rw, join_style=1).buffer(-rw, join_style=1) if rw else box(x0, y0, x1, y1)
-    win = win.intersection(inner)
-    wfr = box(x0, y0, x1, y1)
-    wcore = box(x0 + fw, y0 + fw, x1 - fw, y1 - fw)
+    if window is None:
+        # vidriera completa, sin hueco para el texto
+        x0 = y0 = x1 = y1 = None
+    else:
+        x0, y0, x1, y1 = window
+    win = Polygon() if window is None else box(x0, y0, x1, y1).buffer(rw, join_style=1).buffer(-rw, join_style=1) if rw else box(x0, y0, x1, y1)
+    win = win if window is None else win.intersection(inner)
+    wfr = Polygon() if window is None else box(x0, y0, x1, y1)
+    wcore = None if window is None else box(x0 + fw, y0 + fw, x1 - fw, y1 - fw)
     wband = []
-    for (ax, ay) in ((x0, y0), (x1 - fw, y0), (x0, y1 - fw), (x1 - fw, y1 - fw)):
+    for (ax, ay) in (() if window is None else ((x0, y0), (x1 - fw, y0), (x0, y1 - fw), (x1 - fw, y1 - fw))):
         wband.append((box(ax, ay, ax + fw, ay + fw), 'amber'))
-    wband += [(box(x0 + fw, y0, x1 - fw, y0 + fw), 'wband'), (box(x0 + fw, y1 - fw, x1 - fw, y1), 'wband'),
+    wband += [] if window is None else [(box(x0 + fw, y0, x1 - fw, y0 + fw), 'wband'), (box(x0 + fw, y1 - fw, x1 - fw, y1), 'wband'),
               (box(x0, y0 + fw, x0 + fw, y1 - fw), 'wband'), (box(x1 - fw, y0 + fw, x1, y1 - fw), 'wband')]
     win = wfr
     # flores
@@ -298,7 +302,8 @@ def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12, stop
         bgp = [(make_valid(q).buffer(0).difference(e), c) for q, c in bgp] + [(e, key)]
     pieces += bgp + final_fl
     pieces += wband
-    pieces.append((wcore, 'cream'))
+    if wcore is not None:
+        pieces.append((wcore, 'cream'))
     return pieces
 
 
@@ -387,7 +392,7 @@ def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=(), glow=('#FFF6D8', '#FC
          + f'<g filter="url(#{uid}opal)">{"".join(fbody)}</g>'
          + f'<rect width="{W}" height="{H}" filter="url(#{uid}tex)" opacity=".18"/>'
          + f'<rect width="{W}" height="{H}" fill="url(#{uid}light)"/>'
-         + (f'<path fill-rule="evenodd" fill="url(#{uid}night)" d="M0 0H{W}V{H}H0Z M{win[0]} {win[1]}V{win[3]}H{win[2]}V{win[1]}Z"/>' if dyn else '')
+         + (f'<path fill-rule="evenodd" fill="url(#{uid}night)" d="M0 0H{W}V{H}H0Z' + (f' M{win[0]} {win[1]}V{win[3]}H{win[2]}V{win[1]}Z' if win else '') + '"/>' if dyn else '')
          + f'<g fill="none" stroke="{LEAD}" stroke-width="{lead}" stroke-linejoin="round">{leads}</g>'
          + f'<g fill="none" stroke="#8A8792" stroke-opacity=".55" stroke-width="{lead*.25:.2f}" stroke-linejoin="round" transform="translate(-.4,-.4)">{leads}</g>'
          + f'<rect x="1.5" y="1.5" width="{W-3}" height="{H-3}" fill="none" stroke="{LEAD}" stroke-width="3"/>'

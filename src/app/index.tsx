@@ -55,16 +55,16 @@ export default function Home() {
                 accessibilityRole="header"
                 style={[
                   styles.hero,
-                  pane >= 340
-                    ? { fontSize: 44, lineHeight: 48 }
-                    : pane >= 260
-                      ? { fontSize: 34, lineHeight: 38 }
+                  pane >= 500
+                    ? { fontSize: 46, lineHeight: 50 }
+                    : pane >= 320
+                      ? { fontSize: 36, lineHeight: 40 }
                       : { fontSize: 29, lineHeight: 33 },
                 ]}
               >
                 ¿Qué quieres cantar hoy?
               </Text>
-              <Text style={[styles.heroSub, pane < 340 && { fontSize: 15, lineHeight: 21 }]}>
+              <Text style={[styles.heroSub, pane < 320 && { fontSize: 15, lineHeight: 21 }]}>
                 Busca una canción para ver cómo está hecha, o aprende a entrenar cada recurso vocal.
               </Text>
               <View style={styles.searchBox}>
@@ -73,7 +73,7 @@ export default function Home() {
                   value={query}
                   onChangeText={setQuery}
                   onSubmitEditing={goToResults}
-                  placeholder={pane >= 340 ? 'Canción o artista' : 'Canción'}
+                  placeholder={pane >= 290 ? 'Canción o artista' : 'Canción'}
                   placeholderTextColor={colors.faint}
                   style={[styles.input, !wide && { fontSize: 15 }]}
                   autoCorrect={false}
@@ -339,7 +339,8 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'stretch',
+    alignSelf: 'center',
+    width: '100%',
     backgroundColor: colors.surface,
     borderRadius: radius.pill,
     borderWidth: 1.5,
