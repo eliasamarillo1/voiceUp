@@ -4,8 +4,8 @@ from glass import build, svg
 from glass import build, svg
 
 
-def hero_svg(W, H, window, flowers, cells, seed, uid, border, lead):
-    return svg(W, H, build(W, H, window, flowers, border=border, cells=cells, seed=seed, rw=6, fw=12 if W > 700 else 9), uid=uid, lead=lead)
+def hero_svg(W, H, window, flowers, cells, seed, uid, border, lead, glows=()):
+    return svg(W, H, build(W, H, window, flowers, border=border, cells=cells, seed=seed, rw=6, fw=12 if W > 700 else 9), uid=uid, lead=lead, glows=glows)
 
 K = 0.82  # escala horizontal de los laterales para el ancho real de la app (888 px)
 
@@ -27,7 +27,7 @@ def side(W, H, mirror, floor, sd, k=K):
 W, H = 888, 480
 floor = H - 22
 DW = (252, 42, W - 252, H - 42)
-desk = hero_svg(W, H, DW, side(W, H, False, floor, 1) + side(W, H, True, floor, 7), 50, 3, 'vd', 22, 4.0)
+desk = hero_svg(W, H, DW, side(W, H, False, floor, 1) + side(W, H, True, floor, 7), 50, 3, 'vd', 22, 4.0, [(113, 170, 170), (W - 113, 170, 170)])
 
 MW_, MH = 358, 600
 mf = MH - 15
@@ -42,7 +42,7 @@ mob_fl = [
     ('iris', 179, mf - 40, .42, 0, [(179, mf), (179, mf - 40)], 4),
 ]
 MWIN = (40, 150, MW_ - 40, MH - 112)
-mob = hero_svg(MW_, MH, MWIN, mob_fl, 34, 5, 'vm', 15, 2.8)
+mob = hero_svg(MW_, MH, MWIN, mob_fl, 34, 5, 'vm', 15, 2.8, [(84, 66, 80), (MW_ - 84, 66, 80), (179, mf - 70, 70)])
 
 import re
 fix = lambda x: re.sub(r'^<svg xmlns="http://www.w3.org/2000/svg" width="\d+" height="\d+"', '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"', x)

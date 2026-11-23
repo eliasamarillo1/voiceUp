@@ -11,14 +11,14 @@ LEAD = '#34323A'
 PAL = {
     'ruby': ['#C2415E', '#D4586F', '#B8384F'],
     'rose': ['#E48A9C', '#EC9FAE', '#DD7B8F'],
-    'amber': ['#E7A93E', '#EDB955', '#DD9A30'],
+    'amber': ['#F0A92E', '#F4B940', '#E89A22'],
     'violet': ['#5E54AE', '#7065BE', '#544A9E'],
     'lilac': ['#9E92D6', '#ADA2DE', '#9184CB'],
     'leaf': ['#3E8A7E', '#47958A', '#367C71'],
     'leafl': ['#79B3A5', '#86BCAF', '#6DA89A'],
     'stem': ['#3A7F73'],
-    'irisl': ['#8592DE', '#8E9AE2', '#7B89D8'],
-    'irisd': ['#3A44AE', '#4250BA', '#3640A4'],
+    'irisl': ['#8592DE', '#8E9AE2', '#7B89D8', '#9A92E0', '#7F98E4'],
+    'irisd': ['#3A44AE', '#4250BA', '#3640A4', '#4A3DA8', '#2F4BB8', '#3B33A0'],
     'signal': ['#F4F3FB', '#EEF0FA'],
     'irisv': ['#C3C9F0', '#CBD0F3'],
     'signal2': ['#E2E5F7', '#DDE1F6'],
@@ -293,13 +293,24 @@ def build(W, H, window, flowers, border=22, seed=3, cells=60, rw=16, fw=12):
     return pieces
 
 
-def svg(W, H, pieces, seed=5, lead=4.2, uid='g'):
+def svg(W, H, pieces, seed=5, lead=4.2, uid='g', glows=()):
     rnd = random.Random(seed)
     defs = [f'''<filter id="{uid}tex" x="0" y="0" width="100%" height="100%">
 <feTurbulence type="fractalNoise" baseFrequency="0.035 0.06" numOctaves="2" seed="4"/>
 <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 -.35"/></filter>
 <radialGradient id="{uid}light" cx="30%" cy="18%" r="85%"><stop offset="0" stop-color="#fff" stop-opacity=".28"/>
-<stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#1c1a30" stop-opacity=".10"/></radialGradient>''']
+<stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#1c1a30" stop-opacity=".10"/></radialGradient>
+<filter id="{uid}opal" x="0" y="0" width="100%" height="100%">
+<feTurbulence type="fractalNoise" baseFrequency="0.022 0.05" numOctaves="3" seed="11" result="n"/>
+<feColorMatrix in="n" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.3 -.74" result="w"/>
+<feComposite in="w" in2="SourceAlpha" operator="in" result="ws"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.02 0.05" numOctaves="2" seed="3" result="m"/>
+<feColorMatrix in="m" values="0 0 0 0 .1  0 0 0 0 .04  0 0 0 0 .3  0 0 0 1.4 -.62" result="d"/>
+<feComposite in="d" in2="SourceAlpha" operator="in" result="ds"/>
+<feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="ds"/><feMergeNode in="ws"/></feMerge></filter>''']
+    defs.append(f'<radialGradient id="{uid}glow"><stop offset="0" stop-color="#FFF6D8" stop-opacity=".85"/>'
+                f'<stop offset=".5" stop-color="#FCE9B8" stop-opacity=".35"/><stop offset="1" stop-color="#FCE9B8" stop-opacity="0"/></radialGradient>')
+    FLOWER = ('irisl', 'irisd', 'signal', 'signal2', 'style', 'amber', 'leaf', 'leafl', 'stem')
     grads = {}
 
     def fill(key):
@@ -311,6 +322,14 @@ def svg(W, H, pieces, seed=5, lead=4.2, uid='g'):
             base = shade(base, 0.2)
         if key in ('cream',):
             return base
+        if k in FLOWER:
+            cx = rnd.choice([30, 40, 50, 60])
+            gid = f'{uid}r{base[1:]}{cx}'
+            if gid not in grads:
+                grads[gid] = (f'<radialGradient id="{gid}" cx="{cx}%" cy="28%" r="90%">'
+                              f'<stop offset="0" stop-color="{shade(base, .34)}"/><stop offset=".45" stop-color="{base}"/>'
+                              f'<stop offset="1" stop-color="{shade(base, -.36)}"/></radialGradient>')
+            return f'url(#{gid})'
         ang = rnd.choice([20, 60, 110, 150])
         gid = f'{uid}{base[1:]}{ang}'
         if gid not in grads:
@@ -322,6 +341,7 @@ def svg(W, H, pieces, seed=5, lead=4.2, uid='g'):
         return f'url(#{gid})'
 
     body = []
+    fbody = []
     ids = []
     shapes = []
     for n, (p, key) in enumerate(pieces):
@@ -329,13 +349,16 @@ def svg(W, H, pieces, seed=5, lead=4.2, uid='g'):
         if not d:
             continue
         shapes.append(f'<path id="{uid}{n}" d="{d}"/>')
-        body.append(f'<use href="#{uid}{n}" fill="{fill(key)}"/>')
+        k0 = key.replace('_m', '').replace('_l', '')
+        (fbody if k0 in FLOWER else body).append(f'<use href="#{uid}{n}" fill="{fill(key)}"/>')
         ids.append(f'{uid}{n}')
     defs.append(''.join(shapes))
     leads = ''.join(f'<use href="#{i}"/>' for i in ids)
     s = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">'
          f'<defs>{"".join(defs)}{"".join(grads.values())}</defs>'
          + ''.join(body)
+         + ''.join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="url(#{uid}glow)"/>' for x, y, r in glows)
+         + f'<g filter="url(#{uid}opal)">{"".join(fbody)}</g>'
          + f'<rect width="{W}" height="{H}" filter="url(#{uid}tex)" opacity=".18"/>'
          + f'<rect width="{W}" height="{H}" fill="url(#{uid}light)"/>'
          + f'<g fill="none" stroke="{LEAD}" stroke-width="{lead}" stroke-linejoin="round">{leads}</g>'
